@@ -1,4 +1,5 @@
 ## Sample TOML config 
+```toml
 
 [defaults]
 alert.repeat = "yes" # repeat alert on each cycle
@@ -31,4 +32,4 @@ path = "/home/user/script.sh" # custom shell script check (returns 2 values, she
 [[script]]
 path = "/opt/check.sh" # more custom checks
 
-
+```
