@@ -1,0 +1,17 @@
+name: caju-agent
+version: 0.1.0
+
+authors:
+  - perfecto25 <mike.reider@gmail.com>
+
+targets:
+  agent:
+    main: src/agent.cr
+
+crystal: 1.9.2
+
+license: MIT
+
+dependencies:
+  hardware:
+    github: crystal-community/hardware

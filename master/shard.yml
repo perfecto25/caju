@@ -1,0 +1,13 @@
+name: master
+version: 0.1.0
+
+authors:
+  - perfecto25 <mike.reider@gmail.com>
+
+targets:
+  master:
+    main: src/master.cr
+
+crystal: 1.9.2
+
+license: MIT
