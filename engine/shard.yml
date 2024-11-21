@@ -1,0 +1,17 @@
+name: caju-engine
+version: 0.1.0
+
+authors:
+  - perfecto25 <mike.reider@gmail.com>
+
+targets:
+  master:
+    main: src/engine.cr
+
+crystal: 1.9.2
+
+license: MIT
+
+dependencies:
+  msgpack:
+    github: crystal-community/msgpack-crystal
