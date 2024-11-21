@@ -1,3 +1,8 @@
+# Caju
+
+Server and Endpoint Monitoring Application
+
+
 ## Sample TOML config 
 ```toml
 
@@ -33,3 +38,11 @@ path = "/home/user/script.sh" # custom shell script check (returns 2 values, she
 path = "/opt/check.sh" # more custom checks
 
 ```
+
+
+## Building
+
+cd agent
+shards install
+
+crystal build agent/src/agent.cr -o bin/agent

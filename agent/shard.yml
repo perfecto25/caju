@@ -15,3 +15,5 @@ license: MIT
 dependencies:
   hardware:
     github: crystal-community/hardware
+  msgpack:
+    github: crystal-community/msgpack-crystal

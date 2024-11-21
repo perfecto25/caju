@@ -1,6 +1,10 @@
-# TODO: Write documentation for `Master`
-module Master
-  VERSION = "0.1.0"
+require "http/server"
 
-  # TODO: Put your code here
-end
+server = HTTP::Server.new do |context|
+  context.response.content_type = "text/plain"
+  context.response.print "HELLO"
+end 
+
+address = server.bind_tcp 8080 
+puts "listeining on #{address}"
+server.listen
