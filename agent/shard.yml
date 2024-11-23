@@ -17,3 +17,5 @@ dependencies:
     github: crystal-community/hardware
   msgpack:
     github: crystal-community/msgpack-crystal
+  toml:
+    github: crystal-community/toml.cr
