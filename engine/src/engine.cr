@@ -9,7 +9,6 @@ module Engine
       input_data = MessagePack.unpack(context.request.body.not_nil!)
       # Process the input data (in this example, we're just logging it)
       puts "Received data: #{input_data}"
-      puts input_data["cpu"]
 
       # Prepare the "OK" response in MessagePack format
       response_data = {"status" => "OK"}
@@ -25,7 +24,7 @@ module Engine
     end
   end 
 
-  address = server.bind_tcp 8080 
+  address = server.bind_tcp 8090 
   puts "listeining on #{address}"
   server.listen
 
