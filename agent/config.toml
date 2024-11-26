@@ -18,7 +18,7 @@ trig = 90
 trig = [50,60,80]
 
 [cpu]
-limit = 1 # cpu usage above 90%
+limit = 5 # cpu usage above 5%
 
 [cpu.loadavg.1]
 limit = ".086"

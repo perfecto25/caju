@@ -10,14 +10,21 @@ require "./sys/sys"
 module Caju::Status
   extend self
 
-  def get_actual(config)
+  class Data
+    def initialize(
+      @hostname : String
+      @cpu_pct : Int32, 
+      @loadavg : Array(Float32),
+    )
+    end
+  end
 
-    cpu_data = Cpu.get_cpu_info
-    puts cpu_data
+  def get_actual(config)
+    data = Data.new(hostname: System.hostname.to_s)
     status = {
       "hostname" => System.hostname,
       "uptime" => Sys.get_uptime,
-      "cpu" => cpu_data
+      "cpu" => Cpu.get_cpu_info
     }
     return status
     
@@ -39,7 +46,20 @@ module Caju::Status
     #result = {} of String | Int32 | Float64
     
     if config.has_key?("cpu")
-      puts config["cpu"]
+      
+      if config["cpu"].as_h.has_key?("limit")
+        p config["cpu"]["limit"].as_i
+        #p typeof(config["cpu"]["limit"])
+        cpu = actual["cpu"]
+        p cpu["cpu_pct"]
+        p typeof(cpu)
+        #p typeof(actual["cpu"]["cpu_pct"])
+        #if config["cpu"]["limit"].as_i >= actual["cpu"]["cpu_pct"].as_i
+        #  puts "CPU limit above configured threshold"
+        #end
+      end
+
+      
     end
     # config.each do | key, val |
     #   puts key.to_s + ":" + val.to_s

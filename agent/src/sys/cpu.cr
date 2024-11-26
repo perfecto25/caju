@@ -6,26 +6,7 @@ require "json"
 module Caju::Cpu
   extend self
 
-  # returner struct
-  struct Data
-    include JSON::Serializable
-    struct Meta # immutable host properties
-      include JSON::Serializable
-      property cpu_count : Int32
-      property model : String 
-      property cache : String
-      property cores : Int32 | String
-      def initialize(@cpu_count, @model, @cache, @cores)
-      end
-    end
-    
-    # mutable host properties
-    property cpu_pct : Int32
-    property loadavg : Array(Float32)
-    property meta : Meta
-    def initialize(@cpu_pct, @loadavg, @meta)
-    end
-  end
+
 
     # Define the libc function to get load averages
   lib LibC
@@ -76,26 +57,21 @@ module Caju::Cpu
     cpu_make = get_cpu_make
     loadavg = get_load_avg
 
-    data = Data.new(
-      percent.to_i32.round(2),
-      loadavg,
-      Data::Meta.new(
-        System.cpu_count.to_i32, 
-        cpu_make["model name"]? || "Unknown",
-        cpu_make["cache size"]? || "Unknown",
-        cpu_make["cpu cores"].to_i? || "Unknown"
-      )
-    )
-    ret = { 
-        "cpu_pct" => percent.to_i32.round(2),
-        "loadavg" => get_load_avg,
-        "meta" => { 
-          "cpu_count" => System.cpu_count.to_i32
-        } 
-      }
+    data = Data.new(cpu_pct: percent.round(2).to_i32, loadavg: get_load_avg)
+    puts data
+    # ret = { 
+    #     "cpu_pct" => percent.round(2).to_s,
+    #     "loadavg" => get_load_avg,
+    #     "meta" => { 
+    #       "cpu_count" => System.cpu_count.to_i32,
+    #       "model" => cpu_make["model name"]? || "Unknown",
+    #       "cache" => cpu_make["cache size"]? || "Unknown",
+    #       "cores" => cpu_make["cpu cores"].to_i? || "Unknown"
+    #     } 
+    #   }
       
-    return ret
-
+    # return ret
+    return Nil
     raise "Failed to get CPU usage"
   end
 

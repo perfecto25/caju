@@ -44,15 +44,11 @@ module Caju
   abort "config file is missing", 1 if !File.file? cfgfile
   
   begin
-    config = TOML.parse(File.read("/home/mreider/dev/crystal/caju/agent/config.toml"))
+    config = TOML.parse(File.read(cfgfile))
   rescue exception
     puts "unable to parse TOML: #{exception}"
     exit(1)
   end
-
-  puts config
-  puts daemon
-  puts status
 
   # if daemon, start background proc
   if daemon == true
@@ -63,8 +59,8 @@ module Caju
       #payload = MessagePack.pack(Status.get_actual(config))
       actual = Status.get_actual(config)
       p actual
-      payload = MessagePack.pack(actual.to_json)
-      #payload = MessagePack.pack({"test" => "aaa"})
+      #payload = MessagePack.pack(actual)
+      payload = MessagePack.pack({"test" => "aaa"})
 
     #  payload = MessagePack.pack({
     #    "hostname" => actual["hostname"],
@@ -94,14 +90,14 @@ module Caju
   end # daemon
   
   # if status return status
-  if status == true
+  if status == true && daemon == false
     puts "getting status"
     begin
       actual = Status.get_actual(config)
       puts actual
       puts "----"
       # iterate over config and check each limit vs actual
-      Status.check_actual(config, actual)
+      # Status.check_actual(config, actual)
 
     rescue error
       error.inspect_with_backtrace(STDOUT)
