@@ -4,30 +4,19 @@ alert.repeat = "yes" # repeat alert on each cycle
 alert.groups = "all" # alert all configured groups
 alert.users = "all"
 
+[check]
 
-[[filesystem]]
-path = "root"
-trig = [80,90,95]
-alert.groups = "sysadmins"
+[check.cpu]
+limit = 5
 
-[[filesystem]]
-path = "/home"
-trig = 90
+[check.cpu.loadavg.1]
+limit = 1.5
 
-[memory]
-trig = [50,60,80]
+[check.filesystem.home]
+limit.pct = 30  # alert on 30% usage of /home
+alert_every = 5 # send alert on every 5 % increase
 
-[cpu]
-limit = 5 # cpu usage above 5%
 
-[cpu.loadavg.1]
-limit = ".086"
-
-[cpu.loadavg.5]
-limit = 3
-
-[cpu.loadavg.15]
-limit = 10
 
 # loadavg.15m.limit = 15
 
