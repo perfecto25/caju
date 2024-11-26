@@ -4,14 +4,20 @@ require "http/client"
 require "option_parser"
 require "system"
 require "toml"
-require "./memory"
-require "./cpu"
-require "./sys"
+require "./status"
 
 
 module Caju
   extend self
-  VERSION = "0.1.0"
+
+  {% begin %}
+    VERSION = {{ `shards version "#{__DIR__}"`.chomp.stringify.downcase }}
+  {% end %}
+
+  # default cmdline vars
+  cfgfile = "/etc/caju/caju.toml"
+  daemon = false
+  status = false
 
   OptionParser.parse do |parser|
     parser.banner = "Caju - system monitoring tool"
@@ -24,6 +30,10 @@ module Caju
       STDOUT.puts VERSION
       exit(0)
     end
+    
+    parser.on("-d", "--daemon", "run as daemon") { daemon = true }
+    parser.on("-s", "--status", "get monitor status") { status = true }
+
     parser.invalid_option do |flag|
       STDERR.puts "ERROR: #{flag} is not a valid option."
       STDERR.puts parser
@@ -31,8 +41,73 @@ module Caju
     end
   end
 
-  config = TOML.parse(File.read("/home/mreider/dev/crystal/caju/agent/config.toml"))
+  abort "config file is missing", 1 if !File.file? cfgfile
+  
+  begin
+    config = TOML.parse(File.read("/home/mreider/dev/crystal/caju/agent/config.toml"))
+  rescue exception
+    puts "unable to parse TOML: #{exception}"
+    exit(1)
+  end
+
   puts config
+  puts daemon
+  puts status
+
+  # if daemon, start background proc
+  if daemon == true
+    puts "starting caju agent process"
+    loop do
+      sleep 5
+  
+      #payload = MessagePack.pack(Status.get_actual(config))
+      actual = Status.get_actual(config)
+      p actual
+      payload = MessagePack.pack(actual.to_json)
+      #payload = MessagePack.pack({"test" => "aaa"})
+
+    #  payload = MessagePack.pack({
+    #    "hostname" => actual["hostname"],
+    #    "cpu" => actual["cpu"], 
+    #     "cpu_pct" => PID_STAT.cpu_usage!,
+    #     "mem" => Memory.sys_mem_info,
+    #     "uptime" => Sys.get_uptime
+
+
+      p payload
+      response = HTTP::Client.post("http://localhost:8090", 
+        headers: HTTP::Headers {
+          "Content-Type" => "application/msgpack",
+          "Accept" => "application/msgpack"
+  
+        },
+        body: payload
+      )
+      
+      if response.success?
+        result = MessagePack.unpack(response.body)
+        puts result
+      else 
+        puts "Error #{response.status_code}"
+      end
+    end # loop
+  end # daemon
+  
+  # if status return status
+  if status == true
+    puts "getting status"
+    begin
+      actual = Status.get_actual(config)
+      puts actual
+      puts "----"
+      # iterate over config and check each limit vs actual
+      Status.check_actual(config, actual)
+
+    rescue error
+      error.inspect_with_backtrace(STDOUT)
+      exit 1
+    end
+  end
 
 
   
@@ -43,36 +118,5 @@ module Caju
   
 
 
-  loop do
-    sleep 5
 
-    
-  
-    
-
-    payload = MessagePack.pack({
-      "hostname" => System.hostname,
-      "cpu" => Cpu.get_cpu_info, 
-      #"cpu_pct" => PID_STAT.cpu_usage!,
-      "mem" => Memory.sys_mem_info,
-      "uptime" => Sys.get_uptime
-     # "mem_pct" => mem[1]  
-    })
-
-    response = HTTP::Client.post("http://localhost:8090", 
-      headers: HTTP::Headers {
-        "Content-Type" => "application/msgpack",
-        "Accept" => "application/msgpack"
-
-      },
-      body: payload
-    )
-    
-    if response.success?
-      result = MessagePack.unpack(response.body)
-      puts result
-    else 
-      puts "Error #{response.status_code}"
-    end
-  end # loop
 end # module

@@ -18,8 +18,18 @@ trig = 90
 trig = [50,60,80]
 
 [cpu]
-trig = [90] # cpu usage above 90
-loadavg.trig = 30 # load average above 30
+limit = 1 # cpu usage above 90%
+
+[cpu.loadavg.1]
+limit = ".086"
+
+[cpu.loadavg.5]
+limit = 3
+
+[cpu.loadavg.15]
+limit = 10
+
+# loadavg.15m.limit = 15
 
 [[script]]
 path = "/home/user/script.sh" # custom shell script check (returns 2 values, shell output 1/0 and message, ie
