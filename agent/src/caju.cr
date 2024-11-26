@@ -61,8 +61,20 @@ module Caju
       sleep 5
   
       #payload = MessagePack.pack(Status.get_actual(config))
-      payload = MessagePack.pack({"ok" => "test"})
-  
+      actual = Status.get_actual(config)
+      p actual
+      payload = MessagePack.pack(actual.to_json)
+      #payload = MessagePack.pack({"test" => "aaa"})
+
+    #  payload = MessagePack.pack({
+    #    "hostname" => actual["hostname"],
+    #    "cpu" => actual["cpu"], 
+    #     "cpu_pct" => PID_STAT.cpu_usage!,
+    #     "mem" => Memory.sys_mem_info,
+    #     "uptime" => Sys.get_uptime
+
+
+      p payload
       response = HTTP::Client.post("http://localhost:8090", 
         headers: HTTP::Headers {
           "Content-Type" => "application/msgpack",

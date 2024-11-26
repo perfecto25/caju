@@ -11,15 +11,25 @@ module Caju::Status
   extend self
 
   def get_actual(config)
+
+    cpu_data = Cpu.get_cpu_info
+    puts cpu_data
     status = {
       "hostname" => System.hostname,
-      "cpu" => Cpu.get_cpu_info,
-    #"cpu_pct" => PID_STAT.cpu_usage!,
+      "uptime" => Sys.get_uptime,
+      "cpu" => cpu_data
+    }
+    return status
+    
+   # puts typeof(cpu_data)
+    #status = {"ok": "ok"}
+     #"cpu_pct" => PID_STAT.cpu_usage!,
       #"mem" => { "actual" => Memory.sys_mem_info },
       #"uptime" => { "actual" => Sys.get_uptime }
-    }
+    #}
 
-    return status
+   
+    #return status
    # "mem_pct" => mem[1]  
   end # get_status
 
