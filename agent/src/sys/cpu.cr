@@ -18,7 +18,7 @@ module Caju::Cpu
     avg = Pointer(Float64).malloc(3)
     # Call the C function to get load averages
     if LibC.getloadavg(avg, 3) != -1
-      load_avg = [avg[0].to_f32.round(2), avg[1].to_f32.round(2), avg[2].to_f32.round(2)]
+      load_avg = [avg[0].round(2), avg[1].round(2), avg[2].round(2)]
       return load_avg
     else
       raise "Failed to get load average"
@@ -36,7 +36,7 @@ module Caju::Cpu
     return cpu_make
   end
 
-  def get_cpu_info
+  def get_cpu_pct
     percent = 0
     prev_idle = prev_total = 0
     2.times do
@@ -54,11 +54,11 @@ module Caju::Cpu
       sleep 1
     end
 
-    cpu_make = get_cpu_make
-    loadavg = get_load_avg
+    # cpu_make = get_cpu_make
+    # loadavg = get_load_avg
 
-    data = Data.new(cpu_pct: percent.round(2).to_i32, loadavg: get_load_avg)
-    puts data
+    #data = Data.new(cpu_pct: percent.round(2).to_i32, loadavg: get_load_avg)
+    #puts data
     # ret = { 
     #     "cpu_pct" => percent.round(2).to_s,
     #     "loadavg" => get_load_avg,
@@ -71,7 +71,7 @@ module Caju::Cpu
     #   }
       
     # return ret
-    return Nil
+    return percent.round(2).to_i32
     raise "Failed to get CPU usage"
   end
 

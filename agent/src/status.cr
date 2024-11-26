@@ -10,34 +10,45 @@ require "./sys/sys"
 module Caju::Status
   extend self
 
-  class Data
+  struct Data
+    include MessagePack::Serializable
+    property hostname, cpu_pct, loadavg
     def initialize(
-      @hostname : String
+      @hostname : String, 
       @cpu_pct : Int32, 
-      @loadavg : Array(Float32),
-    )
+      @cpu_loadavg : Array(Float64),
+      @cpu_model : String,
+      @cpu_cache : String,
+      @cpu_cores : Int32 | String,
+      )
+    end
+
+    def to_h
+      {
+        "hostname" => @hostname, 
+        "cpu" => {
+          "pct" => @cpu_pct, 
+          "loadvg" => @cpu_loadavg,
+          "model" => @cpu_model,
+          "cache" => @cpu_cache,
+          "cores" => @cpu_cores
+        }
+      }
     end
   end
 
   def get_actual(config)
-    data = Data.new(hostname: System.hostname.to_s)
-    status = {
-      "hostname" => System.hostname,
-      "uptime" => Sys.get_uptime,
-      "cpu" => Cpu.get_cpu_info
-    }
-    return status
-    
-   # puts typeof(cpu_data)
-    #status = {"ok": "ok"}
-     #"cpu_pct" => PID_STAT.cpu_usage!,
-      #"mem" => { "actual" => Memory.sys_mem_info },
-      #"uptime" => { "actual" => Sys.get_uptime }
-    #}
+    data = Data.new(
+      System.hostname.to_s, 
+      Cpu.get_cpu_pct, 
+      Cpu.get_load_avg, 
+      Cpu.get_cpu_make["model name"]? || "Unknown",
+      Cpu.get_cpu_make["cache size"]? || "Unknown",
+      Cpu.get_cpu_make["cpu cores"].to_i? || 0,
 
-   
-    #return status
-   # "mem_pct" => mem[1]  
+      )
+
+    return data.to_h
   end # get_status
 
 

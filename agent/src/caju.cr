@@ -55,27 +55,12 @@ module Caju
     puts "starting caju agent process"
     loop do
       sleep 5
-  
-      #payload = MessagePack.pack(Status.get_actual(config))
-      actual = Status.get_actual(config)
-      p actual
-      #payload = MessagePack.pack(actual)
-      payload = MessagePack.pack({"test" => "aaa"})
-
-    #  payload = MessagePack.pack({
-    #    "hostname" => actual["hostname"],
-    #    "cpu" => actual["cpu"], 
-    #     "cpu_pct" => PID_STAT.cpu_usage!,
-    #     "mem" => Memory.sys_mem_info,
-    #     "uptime" => Sys.get_uptime
-
-
-      p payload
+      payload = Status.get_actual(config).to_msgpack
+      #payload = MessagePack.pack({"test" => "aaa"})
       response = HTTP::Client.post("http://localhost:8090", 
         headers: HTTP::Headers {
           "Content-Type" => "application/msgpack",
           "Accept" => "application/msgpack"
-  
         },
         body: payload
       )
@@ -95,9 +80,11 @@ module Caju
     begin
       actual = Status.get_actual(config)
       puts actual
+      puts actual["hostname"]
+      puts typeof(actual)
       puts "----"
       # iterate over config and check each limit vs actual
-      # Status.check_actual(config, actual)
+      #Status.check_actual(config, actual)
 
     rescue error
       error.inspect_with_backtrace(STDOUT)
