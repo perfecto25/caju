@@ -54,29 +54,42 @@ module Caju::Cpu
       sleep 1
     end
 
-    # cpu_make = get_cpu_make
-    # loadavg = get_load_avg
-
-    #data = Data.new(cpu_pct: percent.round(2).to_i32, loadavg: get_load_avg)
-    #puts data
-    # ret = { 
-    #     "cpu_pct" => percent.round(2).to_s,
-    #     "loadavg" => get_load_avg,
-    #     "meta" => { 
-    #       "cpu_count" => System.cpu_count.to_i32,
-    #       "model" => cpu_make["model name"]? || "Unknown",
-    #       "cache" => cpu_make["cache size"]? || "Unknown",
-    #       "cores" => cpu_make["cpu cores"].to_i? || "Unknown"
-    #     } 
-    #   }
-      
-    # return ret
     return percent.round(2).to_i32
     raise "Failed to get CPU usage"
-  end
+  end # get_cpu_pct
 
 
+  def check_status(config, actual, result)
+    
+    # CPU LIMIT
+    if ! (config.dig?("check", "cpu", "limit") && actual.dig?("cpu", "pct"))
+      return result
+    end
 
+    cfg_val = config.dig?("check", "cpu", "limit")
+    actual_val = actual.dig?("cpu", "pct")
+    if !cfg_val.nil? && !actual_val.nil?
+      if actual_val.is_a?(Int32)
+
+        # create ALERT if actual value is over threshold of config value
+        if cfg_val.as_i <= actual_val
+          if ! result["alert"].has_key?("cpu")
+            result["alert"]["cpu"] = Hash(String, Array(Int32) | Array(Float64)).new
+          end
+          result["alert"]["cpu"]["limit"] = [cfg_val.as_i, actual_val] 
+
+          # create OK if actual value is below threshold of config value
+        else
+          if ! result["ok"].has_key?("cpu")
+            result["ok"]["cpu"] = Hash(String, Array(Int32) | Array(Float64)).new
+          end
+          result["ok"]["cpu"]["limit"] = [cfg_val.as_i, actual_val] 
+        end
+      end
+    end 
+
+    return result
+  end # check_status
 
 
 end # module

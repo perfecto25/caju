@@ -4,6 +4,7 @@ require "http/client"
 require "option_parser"
 require "system"
 require "toml"
+require "yaml"
 require "./status"
 
 
@@ -43,11 +44,17 @@ module Caju
 
   abort "config file is missing", 1 if !File.file? cfgfile
   
+  # begin
+  #   config = TOML.parse(File.read(cfgfile)).as(Hash)
+  # rescue exception
+  #   puts "unable to parse TOML: #{exception}"
+  #   exit(1)
+  # end
+
   begin
-    config = TOML.parse(File.read(cfgfile))
+    config = YAML.parse(File.read(cfgfile))
   rescue exception
-    puts "unable to parse TOML: #{exception}"
-    exit(1)
+    abort "unable to read config file", 1
   end
 
   # if daemon, start background proc
@@ -79,12 +86,8 @@ module Caju
     puts "getting status"
     begin
       actual = Status.get_actual(config)
-      puts actual
-      puts actual["hostname"]
-      puts typeof(actual)
-      puts "----"
       # iterate over config and check each limit vs actual
-      #Status.check_actual(config, actual)
+      Status.check_status(config, actual)
 
     rescue error
       error.inspect_with_backtrace(STDOUT)
