@@ -19,3 +19,6 @@ dependencies:
     github: crystal-community/msgpack-crystal
   toml:
     github: crystal-community/toml.cr
+  crysterm:
+    github: crystallabs/crysterm
+    branch: master

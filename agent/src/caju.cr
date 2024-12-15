@@ -6,6 +6,7 @@ require "system"
 require "toml"
 require "yaml"
 require "./status"
+require "./log"
 
 
 module Caju
@@ -44,25 +45,25 @@ module Caju
 
   abort "config file is missing", 1 if !File.file? cfgfile
   
-  # begin
-  #   config = TOML.parse(File.read(cfgfile)).as(Hash)
-  # rescue exception
-  #   puts "unable to parse TOML: #{exception}"
-  #   exit(1)
-  # end
-
   begin
-    config = YAML.parse(File.read(cfgfile))
+    config = TOML.parse(File.read(cfgfile)).as(Hash)
   rescue exception
-    abort "unable to read config file", 1
+    abort "unable to parse TOML: #{exception}", 1
   end
+
+  # begin
+  #   config = YAML.parse(File.read(cfgfile))
+  # rescue exception
+  #   abort "unable to read config file", 1
+  # end
+  log = init_log(config)
 
   # if daemon, start background proc
   if daemon == true
     puts "starting caju agent process"
     loop do
       sleep 5
-      payload = Status.get_actual(config).to_msgpack
+      payload = Status.get_actual(config, log).to_msgpack
       #payload = MessagePack.pack({"test" => "aaa"})
       response = HTTP::Client.post("http://localhost:8090", 
         headers: HTTP::Headers {
@@ -85,11 +86,12 @@ module Caju
   if status == true && daemon == false
     puts "getting status"
     begin
-      actual = Status.get_actual(config)
+      actual = Status.get_actual(config, log)
       # iterate over config and check each limit vs actual
-      Status.check_status(config, actual)
+      Status.check_status(config, actual, log)
 
     rescue error
+      p error
       error.inspect_with_backtrace(STDOUT)
       exit 1
     end

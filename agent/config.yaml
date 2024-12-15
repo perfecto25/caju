@@ -1,5 +1,8 @@
 ---
 check:
   cpu:
-    limit: 10 # 1% of cpu or above
-    loadavg: { 1m: 1, 5m: 2, 15m: 3 }
+    limit: 10 # % of total CPU usage
+    loadavg: 
+      1m: 0.1
+      5m: 0.5
+      15m: 3
