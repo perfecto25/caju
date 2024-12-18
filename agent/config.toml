@@ -1,3 +1,6 @@
+[log]
+destination = "stdout"
+level = "debug"
 
 [defaults]
 alert.repeat = "yes" # repeat alert on each cycle
@@ -7,7 +10,7 @@ alert.users = "all"
 [check]
 
 [check.cpu]
-limit = 5
+limit = 1  # 5 % limit
 
 [check.cpu.loadavg.1]
 limit = 1.5

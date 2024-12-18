@@ -1,0 +1,8 @@
+---
+check:
+  cpu:
+    limit: 10 # % of total CPU usage
+    loadavg: 
+      1m: 0.1
+      5m: 0.5
+      15m: 3
