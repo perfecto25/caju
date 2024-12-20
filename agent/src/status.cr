@@ -64,9 +64,10 @@ module Caju::Status
     end
 
     result = Cpu.check_cpu_limit_status(config, actual, result, log)
+    result = Cpu.check_cpu_loadavg_status(config, actual, result, log)
     log.info { "test 2" }
     #result = Cpu.check_cpu_loadavg_status(config, actual, result)
-    p result
+    log.info { result }
       
 
 

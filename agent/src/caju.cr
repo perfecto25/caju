@@ -102,9 +102,4 @@ module Caju
   #cpu = Hardware::CPU.new
   #PID_STAT = Hardware::PID.new.stat               # Default is Process.pid
   #app_stat = Hardware::PID.new("terminator").stat # Take the first matching PID
-
-  
-
-
-
 end # module
