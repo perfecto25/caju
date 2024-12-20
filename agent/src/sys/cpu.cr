@@ -85,33 +85,21 @@ module Caju::Cpu
 
   def check_cpu_loadavg_status(config, actual, result, log)
     log = ::Log.for("Caju::CPU::check_cpu_loadavg_status")
-    
-    if ! config.dig?("check", "cpu", "loadavg")
-      log.warn { "J1"}
-    end
 
-    return result if !config.dig?("check", "cpu", "loadavg") && !actual.dig?("cpu", "loadavg")
+    return result if ! config.dig?("check", "cpu", "loadavg") || ! actual.dig?("cpu", "loadavg")
     result["alert"]["cpu"] = Hash(String, Array(Int32) | Array(Float64)).new if ! result["alert"].has_key?("cpu")
     result["ok"]["cpu"] = Hash(String, Array(Int32) | Array(Float64)).new if ! result["ok"].has_key?("cpu")
 
     cfg_val = config.dig?("check", "cpu", "loadavg")
     actual_val = actual.dig?("cpu", "loadavg")
-    log.warn { cfg_val }
-    log.warn { actual_val }
-    log.warn { typeof(actual_val)}
-    
+
     if !cfg_val.nil? && !actual_val.nil? && actual_val.is_a?(Array(Float64))
-      log.info { "d0" }(Array(Float64) | Int32 | String | Nil)
-      if actual_val.is_a?((Array(Float64) | Int32 | String | Nil))
-        log.info { "d1" }
-        ["1m", "5m", "15m"].each_with_index do |value, idx|
-          log.info { result["alert"]["cpu"] }
-          if cfg_val.as_h.has_key?(value) && actual_val.is_a?(Array(Float64)) && actual_val.size == 3
-            if cfg_val[value].as_f <= actual_val[idx]          
-              result["alert"]["cpu"]["loadavg.#{value}"] = [cfg_val[value].as_f, actual_val[idx].to_f64]
-            else 
-              result["ok"]["cpu"]["loadavg.#{value}"] = [cfg_val[value].as_f, actual_val[idx].to_f64]
-            end
+      ["min1", "min5", "min15"].each_with_index do |value, idx|
+        if cfg_val.as_h.has_key?(value) && actual_val.size == 3
+          if cfg_val[value].as_f <= actual_val[idx]
+            result["alert"]["cpu"]["loadavg.#{value}"] = [cfg_val[value].as_f, actual_val[idx].to_f64]
+          else 
+            result["ok"]["cpu"]["loadavg.#{value}"] = [cfg_val[value].as_f, actual_val[idx].to_f64]
           end
         end
       end

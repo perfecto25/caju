@@ -34,6 +34,8 @@ def init_log(cfg)
         Log::Severity::Warn
       when "error"
         Log::Severity::Error
+      when "trace"
+        Log::Severity::Trace
       else
         Log::Severity::Info
       end
