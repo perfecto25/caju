@@ -3,13 +3,14 @@ require "msgpack"
 require "http/client"
 require "option_parser"
 require "system"
+require "colorize"
 require "toml"
 require "yaml"
 require "./status"
 require "./log"
 
 
-module Caju
+module Agent
   extend self
 
   {% begin %}
@@ -87,11 +88,21 @@ module Caju
     puts "getting status"
     begin
       actual = Status.get_actual(config, log)
+      p actual
       # iterate over config and check each limit vs actual
-      Status.check_status(config, actual, log)
+      result = Status.compare_status(config, actual, log)
+      p typeof(result)
+      if result.to_h.dig?("alert")
 
+        p typeof(result["alert"])
+        p result["alert"]
+      end
+
+      # print out results to a terminal status screen
+      
+      
     rescue error
-      p error
+      puts error.colorize(:red)
       error.inspect_with_backtrace(STDOUT)
       exit 1
     end

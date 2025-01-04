@@ -1,10 +1,11 @@
 
 require "system"
 require "lib_c"
+require "colorize"
 require "json"
 require ".././log"
 
-module Caju::Cpu
+module Agent::Cpu
   extend self
     # Define the libc function to get load averages
   lib LibC
@@ -61,23 +62,30 @@ module Caju::Cpu
     log = ::Log.for("Caju::CPU::check_cpu_limit_status")
     
     return result if ! (config.dig?("check", "cpu", "limit") && actual.dig?("cpu", "pct"))
+    log.warn { "xxx" }
     result["alert"]["cpu"] = Hash(String, Array(Int32) | Array(Float64)).new if ! result["alert"].has_key?("cpu")
+    log.warn { "xxx222" }
     result["ok"]["cpu"] = Hash(String, Array(Int32) | Array(Float64)).new if ! result["ok"].has_key?("cpu")
-    
-    cfg_val = config.dig?("check", "cpu", "limit")
-    log.error {cfg_val}
+    log.warn { "xxx33" }
+    cfg_val = config.dig?("check", "cpu", "limit", "pct")
+    log.warn { "xx44"}
+    log.warn {cfg_val}
     actual_val = actual.dig?("cpu", "pct")
-    if !cfg_val.nil? && !actual_val.nil?
-      if actual_val.is_a?(Int32)
-        # create ALERT if actual value is over threshold of config value
-        if cfg_val.as_i <= actual_val
-          result["alert"]["cpu"]["limit"] = [cfg_val.as_i, actual_val] 
-        else
-          # create OK if actual value is below threshold of config value
-          result["ok"]["cpu"]["limit"] = [cfg_val.as_i, actual_val] 
+    begin
+      if !cfg_val.nil? && !actual_val.nil?
+        if actual_val.is_a?(Int32)
+          # create ALERT if actual value is over threshold of config value
+          if cfg_val.as_i <= actual_val
+            result["alert"]["cpu"]["limit"] = [cfg_val.as_i, actual_val] 
+          else
+            # create OK if actual value is below threshold of config value
+            result["ok"]["cpu"]["limit"] = [cfg_val.as_i, actual_val] 
+          end
         end
       end
-    end 
+    rescue exception
+      puts exception.colorize(:red)
+    end
     
     return result
   end # check_cpu_limit_status
@@ -86,7 +94,7 @@ module Caju::Cpu
   def check_cpu_loadavg_status(config, actual, result, log)
     log = ::Log.for("Caju::CPU::check_cpu_loadavg_status")
 
-    return result if ! config.dig?("check", "cpu", "loadavg") || ! actual.dig?("cpu", "loadavg")
+    return result if !config.dig?("check", "cpu", "loadavg") || !actual.dig?("cpu", "loadavg")
     result["alert"]["cpu"] = Hash(String, Array(Int32) | Array(Float64)).new if ! result["alert"].has_key?("cpu")
     result["ok"]["cpu"] = Hash(String, Array(Int32) | Array(Float64)).new if ! result["ok"].has_key?("cpu")
 
@@ -105,7 +113,7 @@ module Caju::Cpu
       end
     end 
     return result
-  end # check_cpu_limit_status
+  end # check_cpu_loadavg_status
 
 end # module
 

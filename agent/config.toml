@@ -7,10 +7,9 @@ alert.repeat = "yes" # repeat alert on each cycle
 alert.groups = "all" # alert all configured groups
 alert.users = "all"
 
-[check]
 
-[check.cpu]
-limit = 1  # 5 % limit
+[check.cpu.limit]
+pct = 2  # 5 % limit
 
 
 [check.cpu.loadavg]
