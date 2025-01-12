@@ -1,6 +1,6 @@
 require "hardware"
 
-module Caju::Memory
+module Agent::Memory
   extend self 
 
   def sys_mem_info

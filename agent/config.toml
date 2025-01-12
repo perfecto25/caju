@@ -7,13 +7,15 @@ alert.repeat = "yes" # repeat alert on each cycle
 alert.groups = "all" # alert all configured groups
 alert.users = "all"
 
-[check]
 
-[check.cpu]
-limit = 1  # 5 % limit
+[check.cpu.limit]
+pct = 2  # 5 % limit
 
-[check.cpu.loadavg.1]
-limit = 1.5
+
+[check.cpu.loadavg]
+min1 = 0
+min5 = 4
+min15 = 7
 
 [check.filesystem.home]
 limit.pct = 30  # alert on 30% usage of /home

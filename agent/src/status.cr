@@ -7,7 +7,7 @@ require "./sys/memory"
 require "./sys/cpu"
 require "./sys/sys"
 
-module Caju::Status
+module Agent::Status
   extend self
 
   struct Data
@@ -52,7 +52,7 @@ module Caju::Status
 
 
   # check if actual value is over the limit defined in config
-  def check_status(config, actual, log)
+  def compare_status(config, actual, log)
 
     result = Hash(String, Hash(String, Hash(String, Array(Int32) | Array(Float64)))).new
     result["alert"] = Hash(String, Hash(String, Array(Int32) | Array(Float64))).new
@@ -64,13 +64,9 @@ module Caju::Status
     end
 
     result = Cpu.check_cpu_limit_status(config, actual, result, log)
-    log.info { "test 2" }
-    #result = Cpu.check_cpu_loadavg_status(config, actual, result)
-    p result
-      
-
-
-  end # def check_actual
+    result = Cpu.check_cpu_loadavg_status(config, actual, result, log)
+    return result    
+  end # def compare_status
 
 
 end # module

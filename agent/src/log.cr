@@ -34,11 +34,13 @@ def init_log(cfg)
         Log::Severity::Warn
       when "error"
         Log::Severity::Error
+      when "trace"
+        Log::Severity::Trace
       else
         Log::Severity::Info
       end
 
-    log = ::Log.for("Caju")
+    log = ::Log.for("Agent")
     log.level = severity_level
     log
   rescue exception

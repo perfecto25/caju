@@ -1,5 +1,5 @@
 
-module Caju::Sys
+module Agent::Sys
   extend self
 
   def get_uptime
