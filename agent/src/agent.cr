@@ -8,6 +8,8 @@ require "toml"
 require "yaml"
 require "./status"
 require "./log"
+require "./format"
+require "tallboy"
 
 
 module Agent
@@ -91,22 +93,60 @@ module Agent
       p actual
       # iterate over config and check each limit vs actual
       result = Status.compare_status(config, actual, log)
-      p typeof(result)
-      if result.to_h.dig?("alert")
+      # p typeof(result)
+      p result
+      data = [] of Array(String | Colorize::Object(String))
+      check_type = Hash(String, String).new
+      check_type["cpu"] = "system"
+      check_type["memory"] = "system"
+      check_type["process"] = "process"
 
-        p typeof(result["alert"])
-        p result["alert"]
-      end
+      ## cycle through Result Hash and create array for output Table
+      if result.is_a?(Hash)
+        if result.has_key?("alert")
+          result["alert"].each do | key, val |
+            p key.colorize(:yellow)
+            if val.is_a?(Hash)
+              val.each do | k, v |
+                p k.colorize(:cyan)
+                data << ["#{key} - #{k}", v[0].to_s, v[1].to_s, "alert".colorize(:red), check_type[key]]
+              end
+            end
+          end
+        end # alert
 
-      # print out results to a terminal status screen
-      
-      
+        if result.has_key?("ok")
+          result["ok"].each do | key, val |
+            if val.is_a?(Hash)
+              val.each do | k, v |
+                data << ["#{key} - #{k}", v[0].to_s, v[1].to_s, "ok".colorize(:green), check_type[key]]
+              end
+            end
+          end
+        end # ok
+
+      end # result hash
+
+      # generate output table
+      table = Tallboy.table do
+        columns do
+          add "Service"
+          add "Limit"
+          add "Actual"
+          add "Status"
+          add "Check Type"
+        end
+        header
+        rows data
+      end # table
+      puts table.render(:markdown) 
+
     rescue error
       puts error.colorize(:red)
       error.inspect_with_backtrace(STDOUT)
       exit 1
     end
-  end
+  end # if status true
 
 
   
