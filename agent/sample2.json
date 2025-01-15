@@ -1,0 +1,110 @@
+    {
+  "monit": {
+    "@id": "fb40fcf4bcba3d962a03958921f720d7",
+    "@incarnation": "1695732533",
+    "@version": "5.31.0",
+    "server": {
+      "uptime": "0",
+      "poll": "5",
+      "startdelay": "0",
+      "localhostname": "mrxmini",
+      "controlfile": "/home/mreider/dev/python/monitdj/monit.conf",
+      "httpd": {
+        "address": "127.0.0.1",
+        "port": "19841",
+        "ssl": "0"
+      },
+      "credentials": {
+        "username": "monit",
+        "password": "monit"
+      }
+    },
+    "platform": {
+      "name": "Linux",
+      "release": "5.15.0-78-generic",
+      "version": "#85-Ubuntu SMP Fri Jul 7 15:25:09 UTC 2023",
+      "machine": "x86_64",
+      "cpu": "2",
+      "memory": "3824284",
+      "swap": "2097148"
+    },
+    "services": {
+      "service": [
+        {
+          "@name": "root",
+          "type": "0",
+          "collected_sec": "1695732533",
+          "collected_usec": "590974",
+          "status": "2",
+          "status_hint": "0",
+          "monitor": "1",
+          "monitormode": "0",
+          "onreboot": "0",
+          "pendingaction": "0",
+          "fstype": "ext4",
+          "fsflags": "rw,relatime,errors=remount-ro",
+          "mode": "755",
+          "uid": "0",
+          "gid": "0",
+          "block": {
+            "percent": "86.9",
+            "usage": "50279.7",
+            "total": "57889.9"
+          },
+          "inode": {
+            "percent": "18.5",
+            "usage": "699556",
+            "total": "3784704"
+          },
+          "read": {
+            "bytes": {
+              "count": "0",
+              "total": "31041102848"
+            },
+            "operations": {
+              "count": "0",
+              "total": "671199"
+            }
+          },
+          "write": {
+            "bytes": {
+              "count": "0",
+              "total": "27732357120"
+            },
+            "operations": {
+              "count": "0",
+              "total": "533896"
+            }
+          },
+          "servicetime": {
+            "read": "0.000",
+            "write": "0.000"
+          }
+        },
+        {
+          "@name": "mrxmini",
+          "type": "5",
+          "collected_sec": "1695732533",
+          "collected_usec": "450227",
+          "status": "2",
+          "status_hint": "0",
+          "monitor": "2",
+          "monitormode": "0",
+          "onreboot": "0",
+          "pendingaction": "0"
+        }
+      ]
+    },
+    "servicegroups": "None",
+    "event": {
+      "collected_sec": "1695732533",
+      "collected_usec": "590993",
+      "service": "mrxmini",
+      "type": "5",
+      "id": "2",
+      "state": "1",
+      "action": "1",
+      "message": "mem usage of 68.2% matches resource limit [mem usage > 5.0%]"
+    }
+  }
+}

@@ -100,7 +100,7 @@ module Agent
       check_type["cpu"] = "system"
       check_type["memory"] = "system"
       check_type["process"] = "process"
-
+      
       ## cycle through Result Hash and create array for output Table
       if result.is_a?(Hash)
         if result.has_key?("alert")

@@ -21,3 +21,4 @@ dependencies:
     github: crystal-community/toml.cr
   tallboy:
     github: epoch/tallboy
+

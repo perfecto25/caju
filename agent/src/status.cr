@@ -50,21 +50,37 @@ module Agent::Status
     return data.to_h
   end # get_status
 
-
   # check if actual value is over the limit defined in config
   def compare_status(config, actual, log)
 
-    result = Hash(String, Hash(String, Hash(String, Array(Int32) | Array(Float64)))).new
-    result["alert"] = Hash(String, Hash(String, Array(Int32) | Array(Float64))).new
-    result["ok"] = Hash(String, Hash(String, Array(Int32) | Array(Float64))).new
+    result = Hash(
+      String, Hash(
+        String, Hash(
+          String, Hash(
+            String, Array(Int32) | Array(Float64) | String)))).new
+    result["alert"] = Hash(
+      String, Hash(
+          String, Hash(
+            String, Array(Int32) | Array(Float64) | String))).new
+    result["ok"] = Hash(
+      String, Hash(
+          String, Hash(
+            String, Array(Int32) | Array(Float64) | String))).new
 
-    #if ! config.as_h.has_key?("check")
+   # result["alert"]["check_type"] = Hash(String, Hash(String, Array(Int32) | Array(Float64))).new
+ #   result["ok"] = Hash(String, Hash(String, Array(Int32) | Array(Float64) | String)).new
+   #result["ok"]["check_type"] = Hash(String, Hash(String, Array(Int32) | Array(Float64))).new
+
     if ! config.has_key?("check")
       return "No checks defined in config file"
     end
 
-    result = Cpu.check_cpu_limit_status(config, actual, result, log)
-    result = Cpu.check_cpu_loadavg_status(config, actual, result, log)
+    #result["alert"] = Hash(String, Hash(String, String | Array(Int32) | Array(Float64))).new  # ie, result["alert"]["system"]
+    #result["ok"] = Hash(String, Hash(String, String | Array(Int32) | Array(Float64))).new
+
+    result = Cpu.get_status(config, actual, result, log)
+    #result = Cpu.check_cpu_limit_status(config, actual, result, log)
+    #result = Cpu.check_cpu_loadavg_status(config, actual, result, log)
     return result
   end # def compare_status
 
