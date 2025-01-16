@@ -57,29 +57,34 @@ module Agent::Cpu
     raise "Failed to get CPU usage"
   end # get_cpu_pct
 
+  ## generate Hash for Status return
+  def create_status_hash(result)
+    if ! result["alert"].has_key?("system")
+      result["alert"]["system"] = Hash(String, Array(Int32) | Array(Float64)).new
+    end
+    if ! result["ok"].has_key?("system")
+      result["ok"]["system"] = Hash(String, Array(Int32) | Array(Float64)).new
+    end
+    return result
+  end
 
   def check_cpu_limit_status(config, actual, result, log)
     log = ::Log.for("Caju::CPU::check_cpu_limit_status")
     
     return result if ! (config.dig?("check", "cpu", "limit") && actual.dig?("cpu", "pct"))
-    log.warn { "xxx" }
-    result["alert"]["cpu"] = Hash(String, Array(Int32) | Array(Float64)).new if ! result["alert"].has_key?("cpu")
-    log.warn { "xxx222" }
-    result["ok"]["cpu"] = Hash(String, Array(Int32) | Array(Float64)).new if ! result["ok"].has_key?("cpu")
-    log.warn { "xxx33" }
+    result["alert"]["system"]["cpu"] = Hash(String, Hash(Array(Int32) | Array(Float64))).new if ! result["alert"]["system"].has_key?("cpu")
+    result["ok"]["system"]["cpu"] = Hash(String, Hash(Array(Int32) | Array(Float64))).new if ! result["ok"]["system"].has_key?("cpu")
     cfg_val = config.dig?("check", "cpu", "limit", "pct")
-    log.warn { "xx44"}
-    log.warn {cfg_val}
     actual_val = actual.dig?("cpu", "pct")
     begin
       if !cfg_val.nil? && !actual_val.nil?
         if actual_val.is_a?(Int32)
           # create ALERT if actual value is over threshold of config value
           if cfg_val.as_i <= actual_val
-            result["alert"]["cpu"]["limit"] = [cfg_val.as_i, actual_val] 
+            result["alert"]["system"]["cpu"]["limit"] = [cfg_val.as_i, actual_val] 
           else
             # create OK if actual value is below threshold of config value
-            result["ok"]["cpu"]["limit"] = [cfg_val.as_i, actual_val] 
+            result["ok"]["system"]["cpu"]["limit"] = [cfg_val.as_i, actual_val] 
           end
         end
       end
@@ -95,8 +100,8 @@ module Agent::Cpu
     log = ::Log.for("Caju::CPU::check_cpu_loadavg_status")
 
     return result if !config.dig?("check", "cpu", "loadavg") || !actual.dig?("cpu", "loadavg")
-    result["alert"]["cpu"] = Hash(String, Array(Int32) | Array(Float64)).new if ! result["alert"].has_key?("cpu")
-    result["ok"]["cpu"] = Hash(String, Array(Int32) | Array(Float64)).new if ! result["ok"].has_key?("cpu")
+    result["alert"]["system"]["cpu"] = Hash(String, Array(Int32) | Array(Float64)).new if ! result["alert"]["system"].has_key?("cpu")
+    result["ok"]["system"]["cpu"] = Hash(String, Array(Int32) | Array(Float64)).new if ! result["ok"]["system"].has_key?("cpu")
 
     cfg_val = config.dig?("check", "cpu", "loadavg")
     actual_val = actual.dig?("cpu", "loadavg")
@@ -114,6 +119,21 @@ module Agent::Cpu
     end 
     return result
   end # check_cpu_loadavg_status
+
+  # return all CPU statuses
+  def get_status(config, actual, result, log)
+    if ! result["alert"].has_key?("system")
+      result["alert"]["system"] = Hash(String, Hash(String, Array(Int32) | Array(Float64))).new
+    end
+    if ! result["ok"].has_key?("system")
+      result["ok"]["system"] = Hash(String, Hash(String, Array(Int32) | Array(Float64))).new
+    end
+    
+    result = check_cpu_limit_status(config, actual, result, log)
+    return result
+
+  end
+
 
 end # module
 

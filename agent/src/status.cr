@@ -14,7 +14,7 @@ module Agent::Status
     include MessagePack::Serializable
     property hostname, cpu_pct, loadavg
     def initialize(
-      @hostname : String, 
+      @hostname : String,
       @cpu_pct : Int32, 
       @cpu_loadavg : Array(Float64),
       @cpu_model : String,
@@ -25,7 +25,7 @@ module Agent::Status
 
     def to_h
       {
-        "hostname" => @hostname, 
+        "hostname" => @hostname,
         "cpu" => {
           "pct" => @cpu_pct.to_i, 
           "loadavg" => @cpu_loadavg,
@@ -39,7 +39,7 @@ module Agent::Status
 
   def get_actual(config, log)
     data = Data.new(
-      System.hostname.to_s, 
+      System.hostname.to_s,
       Cpu.get_cpu_pct, 
       Cpu.get_load_avg, 
       Cpu.get_cpu_make["model name"]? || "Unknown",
@@ -50,22 +50,38 @@ module Agent::Status
     return data.to_h
   end # get_status
 
-
   # check if actual value is over the limit defined in config
   def compare_status(config, actual, log)
 
-    result = Hash(String, Hash(String, Hash(String, Array(Int32) | Array(Float64)))).new
-    result["alert"] = Hash(String, Hash(String, Array(Int32) | Array(Float64))).new
-    result["ok"] = Hash(String, Hash(String, Array(Int32) | Array(Float64))).new
+    result = Hash(
+      String, Hash(
+        String, Hash(
+          String, Hash(
+            String, Array(Int32) | Array(Float64) | String)))).new
+    result["alert"] = Hash(
+      String, Hash(
+          String, Hash(
+            String, Array(Int32) | Array(Float64) | String))).new
+    result["ok"] = Hash(
+      String, Hash(
+          String, Hash(
+            String, Array(Int32) | Array(Float64) | String))).new
 
-    #if ! config.as_h.has_key?("check")
+   # result["alert"]["check_type"] = Hash(String, Hash(String, Array(Int32) | Array(Float64))).new
+ #   result["ok"] = Hash(String, Hash(String, Array(Int32) | Array(Float64) | String)).new
+   #result["ok"]["check_type"] = Hash(String, Hash(String, Array(Int32) | Array(Float64))).new
+
     if ! config.has_key?("check")
       return "No checks defined in config file"
     end
 
-    result = Cpu.check_cpu_limit_status(config, actual, result, log)
-    result = Cpu.check_cpu_loadavg_status(config, actual, result, log)
-    return result    
+    #result["alert"] = Hash(String, Hash(String, String | Array(Int32) | Array(Float64))).new  # ie, result["alert"]["system"]
+    #result["ok"] = Hash(String, Hash(String, String | Array(Int32) | Array(Float64))).new
+
+    result = Cpu.get_status(config, actual, result, log)
+    #result = Cpu.check_cpu_limit_status(config, actual, result, log)
+    #result = Cpu.check_cpu_loadavg_status(config, actual, result, log)
+    return result
   end # def compare_status
 
 
