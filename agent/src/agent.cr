@@ -66,7 +66,7 @@ module Agent
     puts "starting caju agent process"
     loop do
       sleep 5
-      payload = Status.get_actual(config, log).to_msgpack
+      payload = Status.get_payload(config, log).to_msgpack
       #payload = MessagePack.pack({"test" => "aaa"})
       response = HTTP::Client.post("http://localhost:8090", 
         headers: HTTP::Headers {
@@ -89,57 +89,65 @@ module Agent
   if status == true && daemon == false
     puts "getting status"
     begin
-      actual = Status.get_actual(config, log)
-      p actual
+      payload = Status.get_payload(config, log)
+      
+      p payload
+
+      payload_mp = payload.to_json.to_msgpack
+      
+      
+      v = JSON.parse(MessagePack.unpack(payload_mp).to_s)
+      
+      
       # iterate over config and check each limit vs actual
-      result = Status.compare_status(config, actual, log)
+      #result = Status.compare_status(config, payload, log)
       # p typeof(result)
-      p result
+    #  p result
       data = [] of Array(String | Colorize::Object(String))
       check_type = Hash(String, String).new
       check_type["cpu"] = "system"
       check_type["memory"] = "system"
       check_type["process"] = "process"
       
-      ## cycle through Result Hash and create array for output Table
-      if result.is_a?(Hash)
-        if result.has_key?("alert")
-          result["alert"].each do | key, val |
-            p key.colorize(:yellow)
-            if val.is_a?(Hash)
-              val.each do | k, v |
-                p k.colorize(:cyan)
-                data << ["#{key} - #{k}", v[0].to_s, v[1].to_s, "alert".colorize(:red), check_type[key]]
-              end
-            end
-          end
-        end # alert
+      # ## cycle through Result Hash and create array for output Table
+      # if result.is_a?(Hash)
+      #   if result.has_key?("alert")
+      #     result["alert"].each do | key, val |
+      #       p key.colorize(:yellow)
+      #       if val.is_a?(Hash)
+      #         val.each do | k, v |
+      #           p k.colorize(:cyan)
+      #           data << ["#{key} - #{k}", v[0].to_s, v[1].to_s, "alert".colorize(:red), check_type[key]]
+      #         end
+      #       end
+      #     end
+      #   end # alert
 
-        if result.has_key?("ok")
-          result["ok"].each do | key, val |
-            if val.is_a?(Hash)
-              val.each do | k, v |
-                data << ["#{key} - #{k}", v[0].to_s, v[1].to_s, "ok".colorize(:green), check_type[key]]
-              end
-            end
-          end
-        end # ok
+      #   if result.has_key?("ok")
+      #     result["ok"].each do | key, val |
+      #       if val.is_a?(Hash)
+      #         val.each do | k, v |
+      #           data << ["#{key} - #{k}", v[0].to_s, v[1].to_s, "ok".colorize(:green), check_type[key]]
+      #         end
+      #       end
+      #     end
+      #   end # ok
 
-      end # result hash
+      # end # result hash
 
-      # generate output table
-      table = Tallboy.table do
-        columns do
-          add "Service"
-          add "Limit"
-          add "Actual"
-          add "Status"
-          add "Check Type"
-        end
-        header
-        rows data
-      end # table
-      puts table.render(:markdown) 
+      # # generate output table
+      # table = Tallboy.table do
+      #   columns do
+      #     add "Service"
+      #     add "Limit"
+      #     add "Actual"
+      #     add "Status"
+      #     add "Check Type"
+      #   end
+      #   header
+      #   rows data
+      # end # table
+      # puts table.render(:markdown) 
 
     rescue error
       puts error.colorize(:red)
