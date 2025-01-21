@@ -9,7 +9,7 @@ alert.users = "all"
 
 
 [check.cpu.limit]
-pct = 2  # 5 % limit
+pct = 11  # 5 % limit
 
 
 [check.cpu.loadavg]

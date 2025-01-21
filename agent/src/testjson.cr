@@ -51,7 +51,7 @@ p config_data
 p typeof(config_data)
 
 meta = Meta.new("qbtch4", "poweredge640")
-cfg = Config.new(config_data.as(Hash))
+cfg = Config.new(config_data)
 payload = Payload.new(cfg, meta)
 
 

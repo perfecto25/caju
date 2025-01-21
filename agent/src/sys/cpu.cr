@@ -68,31 +68,31 @@ module Agent::Cpu
     return result
   end
 
-  def check_cpu_limit_status(config, actual, result, log)
+  def check_cpu_limit_status(config, payload, log)
     log = ::Log.for("Caju::CPU::check_cpu_limit_status")
-    
-    return result if ! (config.dig?("check", "cpu", "limit") && actual.dig?("cpu", "pct"))
-    result["alert"]["system"]["cpu"] = Hash(String, Hash(Array(Int32) | Array(Float64))).new if ! result["alert"]["system"].has_key?("cpu")
-    result["ok"]["system"]["cpu"] = Hash(String, Hash(Array(Int32) | Array(Float64))).new if ! result["ok"]["system"].has_key?("cpu")
+
+    return payload if ! (config.dig?("check", "cpu", "limit") && payload.stats.dig?("cpu", "pct"))
+
     cfg_val = config.dig?("check", "cpu", "limit", "pct")
-    actual_val = actual.dig?("cpu", "pct")
+    actual_val = payload.stats.dig?("cpu", "pct")
+
     begin
       if !cfg_val.nil? && !actual_val.nil?
         if actual_val.is_a?(Int32)
           # create ALERT if actual value is over threshold of config value
           if cfg_val.as_i <= actual_val
-            result["alert"]["system"]["cpu"]["limit"] = [cfg_val.as_i, actual_val] 
+            payload.checks["alert"]["cpu"]["limit"] = [cfg_val.as_i, actual_val].join(", ")
           else
             # create OK if actual value is below threshold of config value
-            result["ok"]["system"]["cpu"]["limit"] = [cfg_val.as_i, actual_val] 
+            payload.checks["ok"]["cpu"]["limit"] = [cfg_val.as_i, actual_val].join(", ")
           end
         end
       end
     rescue exception
-      puts exception.colorize(:red)
+      log.error { exception.colorize(:red) }
     end
     
-    return result
+    return payload
   end # check_cpu_limit_status
 
 
@@ -121,16 +121,22 @@ module Agent::Cpu
   end # check_cpu_loadavg_status
 
   # return all CPU statuses
-  def get_status(config, actual, result, log)
-    if ! result["alert"].has_key?("system")
-      result["alert"]["system"] = Hash(String, Hash(String, Array(Int32) | Array(Float64))).new
-    end
-    if ! result["ok"].has_key?("system")
-      result["ok"]["system"] = Hash(String, Hash(String, Array(Int32) | Array(Float64))).new
-    end
+  def get_status(config, payload, log)
     
-    result = check_cpu_limit_status(config, actual, result, log)
-    return result
+    ### create Alert and OK keys
+    if ! payload.checks.dig?("alert", "cpu")
+      payload.checks["alert"]["cpu"] = {} of String => String
+    end
+
+    if ! payload.checks.dig?("ok", "cpu")
+      payload.checks["ok"]["cpu"] = {} of String => String
+    end
+
+    ### get Stats
+    payload.stats["cpu"]["pct"] = get_cpu_pct
+
+    check_cpu_limit_status(config, payload, log)
+    return payload
 
   end
 

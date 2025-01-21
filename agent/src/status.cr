@@ -3,6 +3,7 @@ require "http/client"
 require "option_parser"
 require "system"
 require "toml"
+require "json"
 require "./sys/memory"
 require "./sys/cpu"
 require "./sys/sys"
@@ -10,79 +11,59 @@ require "./sys/sys"
 module Agent::Status
   extend self
 
-  struct Data
+  class Payload
     include MessagePack::Serializable
-    property hostname, cpu_pct, loadavg
-    def initialize(
-      @hostname : String,
-      @cpu_pct : Int32, 
-      @cpu_loadavg : Array(Float64),
-      @cpu_model : String,
-      @cpu_cache : String,
-      @cpu_cores : Int32 | String,
-      )
-    end
+    include JSON::Serializable
+    
+    @[JSON::Field(key: "meta")]
+    property meta : Hash(String, Int32 | String) | Nil
+    @[JSON::Field(key: "stats")]
+    property stats : Hash(String, Hash(String, Array(Float64) | Int32 | String))
+    @[JSON::Field(key: "checks")]
+    property checks : Hash(String, Hash(String, Hash(String,  String)))
 
-    def to_h
-      {
-        "hostname" => @hostname,
-        "cpu" => {
-          "pct" => @cpu_pct.to_i, 
-          "loadavg" => @cpu_loadavg,
-          "model" => @cpu_model,
-          "cache" => @cpu_cache,
-          "cores" => @cpu_cores
-        }
-      }
+    def initialize(@meta, @stats, @checks)
     end
   end
 
-  def get_actual(config, log)
-    data = Data.new(
-      System.hostname.to_s,
-      Cpu.get_cpu_pct, 
-      Cpu.get_load_avg, 
-      Cpu.get_cpu_make["model name"]? || "Unknown",
-      Cpu.get_cpu_make["cache size"]? || "Unknown",
-      Cpu.get_cpu_make["cpu cores"].to_i? || 0,
-      )
 
-    return data.to_h
-  end # get_status
 
-  # check if actual value is over the limit defined in config
-  def compare_status(config, actual, log)
-
-    result = Hash(
-      String, Hash(
-        String, Hash(
-          String, Hash(
-            String, Array(Int32) | Array(Float64) | String)))).new
-    result["alert"] = Hash(
-      String, Hash(
-          String, Hash(
-            String, Array(Int32) | Array(Float64) | String))).new
-    result["ok"] = Hash(
-      String, Hash(
-          String, Hash(
-            String, Array(Int32) | Array(Float64) | String))).new
-
-   # result["alert"]["check_type"] = Hash(String, Hash(String, Array(Int32) | Array(Float64))).new
- #   result["ok"] = Hash(String, Hash(String, Array(Int32) | Array(Float64) | String)).new
-   #result["ok"]["check_type"] = Hash(String, Hash(String, Array(Int32) | Array(Float64))).new
-
+  ### get all actual values as defined from Config
+  ### check if actual value is over the limit defined in config
+  def compare_status(config, payload, log)
     if ! config.has_key?("check")
       return "No checks defined in config file"
     end
 
-    #result["alert"] = Hash(String, Hash(String, String | Array(Int32) | Array(Float64))).new  # ie, result["alert"]["system"]
-    #result["ok"] = Hash(String, Hash(String, String | Array(Int32) | Array(Float64))).new
-
-    result = Cpu.get_status(config, actual, result, log)
+    Cpu.get_status(config, payload, log)
     #result = Cpu.check_cpu_limit_status(config, actual, result, log)
     #result = Cpu.check_cpu_loadavg_status(config, actual, result, log)
-    return result
+    return payload
   end # def compare_status
+
+
+
+
+  def get_payload(config, log)
+    payload = Payload.new(
+      { 
+        "hostname" => System.hostname.to_s,
+        "cpu_model" => Cpu.get_cpu_make["model name"]? || "Unknown",
+        "cpu_cache" => Cpu.get_cpu_make["cache size"]? || "Unknown",
+        "cpu_cores" =>  Cpu.get_cpu_make["cpu cores"].to_i? || 0,
+      },
+      {
+        "cpu" => {} of String => Array(Float64) | Int32 | String
+      },
+      {
+        "alert" => {} of String => Hash(String, String),
+        "ok" => {} of String => Hash(String, String),
+      }
+    )
+    compare_status(config, payload, log)
+    return payload
+  end # get_payload
+
 
 
 end # module
