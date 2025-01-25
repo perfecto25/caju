@@ -18,9 +18,9 @@ module Agent::Status
     @[JSON::Field(key: "meta")]
     property meta : Hash(String, Int32 | String) | Nil
     @[JSON::Field(key: "stats")]
-    property stats : Hash(String, Hash(String, Array(Float64) | Int32 | String))
+    property stats : Hash(String, Hash(String, Array(Float64) | Int32 | Int64 | String))
     @[JSON::Field(key: "checks")]
-    property checks : Hash(String, Hash(String, Hash(String,  String)))
+    property checks : Hash(String, Hash(String, Hash(String, Array(Float64) | String)))
 
     def initialize(@meta, @stats, @checks)
     end
@@ -53,14 +53,18 @@ module Agent::Status
         "cpu_cores" =>  Cpu.get_cpu_make["cpu cores"].to_i? || 0,
       },
       {
-        "cpu" => {} of String => Array(Float64) | Int32 | String
+        "cpu" => {} of String => Array(Float64) | Int32 | String,
+        "mem" => {} of String => Array(Float64) | Int32 | Int64 | String
       },
       {
-        "alert" => {} of String => Hash(String, String),
-        "ok" => {} of String => Hash(String, String),
+        "alert" => {} of String => Hash(String, String | Array(Float64)),
+        "ok" => {} of String => Hash(String, String | Array(Float64)),
       }
     )
     compare_status(config, payload, log)
+    info = Memory.get_mem_info
+    p info
+    p typeof(info)
     return payload
   end # get_payload
 
