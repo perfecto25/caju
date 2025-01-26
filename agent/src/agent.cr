@@ -91,13 +91,11 @@ module Agent
     begin
       payload = Status.get_payload(config, log)
       
-      p payload
-
+      # convert to msgpck binary
       payload_mp = payload.to_json.to_msgpack
       
-      
+      # convert back to hash
       v = JSON.parse(MessagePack.unpack(payload_mp).to_s)
-      
       
       # iterate over config and check each limit vs actual
       #result = Status.compare_status(config, payload, log)
@@ -110,44 +108,43 @@ module Agent
       check_type["process"] = "process"
       
       # ## cycle through Result Hash and create array for output Table
-      # if result.is_a?(Hash)
-      #   if result.has_key?("alert")
-      #     result["alert"].each do | key, val |
-      #       p key.colorize(:yellow)
-      #       if val.is_a?(Hash)
-      #         val.each do | k, v |
-      #           p k.colorize(:cyan)
-      #           data << ["#{key} - #{k}", v[0].to_s, v[1].to_s, "alert".colorize(:red), check_type[key]]
-      #         end
-      #       end
-      #     end
-      #   end # alert
+      if payload.checks.is_a?(Hash)
+        if payload.checks.has_key?("alert")
+          payload.checks["alert"].each do | key, val |
+            p key.colorize(:yellow)
+            if val.is_a?(Hash)
+              val.each do | k, v |
+                p k.colorize(:cyan)
+                data << ["#{key} - #{k}", v[0].to_s, v[1].to_s, "alert".colorize(:red), check_type[key]]
+              end
+            end
+          end
+        end # alert
 
-      #   if result.has_key?("ok")
-      #     result["ok"].each do | key, val |
-      #       if val.is_a?(Hash)
-      #         val.each do | k, v |
-      #           data << ["#{key} - #{k}", v[0].to_s, v[1].to_s, "ok".colorize(:green), check_type[key]]
-      #         end
-      #       end
-      #     end
-      #   end # ok
+        # if result.has_key?("ok")
+        #   result["ok"].each do | key, val |
+        #     if val.is_a?(Hash)
+        #       val.each do | k, v |
+        #         data << ["#{key} - #{k}", v[0].to_s, v[1].to_s, "ok".colorize(:green), check_type[key]]
+        #       end
+        #     end
+        #   end
+        # end # ok
 
-      # end # result hash
+      end # result hash
 
-      # # generate output table
-      # table = Tallboy.table do
-      #   columns do
-      #     add "Service"
-      #     add "Limit"
-      #     add "Actual"
-      #     add "Status"
-      #     add "Check Type"
-      #   end
-      #   header
-      #   rows data
-      # end # table
-      # puts table.render(:markdown) 
+      # generate output table
+      table = Tallboy.table do
+        columns do
+          add "Service"
+          add "Limit"
+          add "Actual"
+          add "Status"
+        end
+        header
+        rows data
+      end # table
+      puts table.render(:markdown) 
 
     rescue error
       puts error.colorize(:red)

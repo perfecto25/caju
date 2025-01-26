@@ -113,26 +113,19 @@ module Agent::Cpu
 
 
 
-  # return all CPU statuses
+  # returns all CPU statuses
   def get_status(config, payload, log)
     
     ### create Alert and OK keys
-    if ! payload.checks.dig?("alert", "cpu")
-      payload.checks["alert"]["cpu"] = {} of String => String | Array(Float64)
+    ["alert","ok"].each do |key|
+      if ! payload.checks.dig?(key, "cpu")
+        payload.checks[key]["cpu"] = {} of String => String | Array(Float64)
+      end
     end
-
-    if ! payload.checks.dig?("ok", "cpu")
-      payload.checks["ok"]["cpu"] = {} of String => String | Array(Float64)
-    end
-
-    ### get Stats
-    payload.stats["cpu"]["pct"] = get_cpu_pct
-    payload.stats["cpu"]["loadavg"] = get_load_avg
 
     check_cpu_limit_status(config, payload, log)
     check_cpu_loadavg_status(config, payload, log)
     return payload
-
   end
 
 
