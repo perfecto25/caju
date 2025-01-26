@@ -16,7 +16,7 @@ module Agent::Status
     include JSON::Serializable
     
     @[JSON::Field(key: "meta")]
-    property meta : Hash(String, Int32 | String) | Nil
+    property meta : Hash(String, Int32 | String | Array(String)) | Nil
     @[JSON::Field(key: "stats")]
     property stats : Hash(String, Hash(String, Array(Float64) | Int32 | Int64 | String))
     @[JSON::Field(key: "checks")]
@@ -51,6 +51,7 @@ module Agent::Status
         "cpu_model" => Cpu.get_cpu_make["model name"]? || "Unknown",
         "cpu_cache" => Cpu.get_cpu_make["cache size"]? || "Unknown",
         "cpu_cores" =>  Cpu.get_cpu_make["cpu cores"].to_i? || 0,
+        "uptime" => Sys.get_uptime
       },
       {
         "cpu" => {} of String => Array(Float64) | Int32 | String,
