@@ -22,4 +22,7 @@ module Agent::Memory
     return mem_info
   end
 
+  def get_status(config, payload, log)
+    puts "mem status" 
+  end
 end # module
