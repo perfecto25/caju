@@ -90,48 +90,49 @@ module Agent
     puts "getting status"
     begin
       payload = Status.get_payload(config, log)
-      
+      p payload
       # convert to msgpck binary
       payload_mp = payload.to_json.to_msgpack
       
       # convert back to hash
       v = JSON.parse(MessagePack.unpack(payload_mp).to_s)
       
-      # iterate over config and check each limit vs actual
-      #result = Status.compare_status(config, payload, log)
-      # p typeof(result)
-    #  p result
-      data = [] of Array(String | Colorize::Object(String))
-      check_type = Hash(String, String).new
-      check_type["cpu"] = "system"
-      check_type["memory"] = "system"
-      check_type["process"] = "process"
-      
-      # ## cycle through Result Hash and create array for output Table
-      if payload.checks.is_a?(Hash)
-        if payload.checks.has_key?("alert")
-          payload.checks["alert"].each do | key, val |
-            p key.colorize(:yellow)
-            if val.is_a?(Hash)
-              val.each do | k, v |
-                p k.colorize(:cyan)
-                data << ["#{key} - #{k}", v[0].to_s, v[1].to_s, "alert".colorize(:red), check_type[key]]
+      if payload.is_a?(Agent::Status::Payload)
+        data = [] of Array(String | Colorize::Object(String))
+        check_type = Hash(String, String).new
+        check_type["cpu"] = "system"
+        check_type["memory"] = "system"
+        check_type["process"] = "process"
+
+        ### cycle through Checks Hash and create array for output Table
+        if payload.checks.is_a?(Hash)
+          p "HASH"
+          if payload.checks.has_key?("alert")
+            payload.checks["alert"].each do | key, val |
+              p key.colorize(:yellow)
+              p val.colorize(:green)
+              if val.is_a?(Hash)
+                val.each do | k, v |
+                  p v
+                  p k.colorize(:cyan)
+                  data << ["(#{key}) #{k}", v[0].to_s, v[1].to_s, "alert".colorize(:red), check_type[key]]
+                end
               end
             end
-          end
-        end # alert
+          end # alert
 
-        # if result.has_key?("ok")
-        #   result["ok"].each do | key, val |
-        #     if val.is_a?(Hash)
-        #       val.each do | k, v |
-        #         data << ["#{key} - #{k}", v[0].to_s, v[1].to_s, "ok".colorize(:green), check_type[key]]
-        #       end
-        #     end
-        #   end
-        # end # ok
-
-      end # result hash
+          if payload.checks.has_key?("ok")
+            payload.checks["ok"].each do | key, val |
+              if val.is_a?(Hash)
+                val.each do | k, v |
+                  data << ["(#{key}) #{k}", v[0].to_s, v[1].to_s, "ok".colorize(:green), check_type[key]]
+                end
+              end
+            end
+          end # ok
+        end # payload is hash
+      end # if Payload
+      p data
 
       # generate output table
       table = Tallboy.table do
@@ -140,9 +141,13 @@ module Agent
           add "Limit"
           add "Actual"
           add "Status"
+          add "Type"
         end
         header
-        rows data
+        if data
+          
+          rows data
+        end
       end # table
       puts table.render(:markdown) 
 

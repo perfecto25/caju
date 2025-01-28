@@ -23,6 +23,11 @@ module Agent::Memory
   end
 
   def get_status(config, payload, log)
-    puts "mem status" 
+    ### create Alert and OK keys
+    ["alert","ok"].each do |key|
+      if ! payload.checks.dig?(key, "memory")
+        payload.checks[key]["memory"] = {} of String => String | Array(Float64) | Array(Int32)
+      end
+    end 
   end
 end # module

@@ -6,30 +6,44 @@ level = "debug"
 alert.repeat = "yes" # repeat alert on each cycle
 alert.groups = "all" # alert all configured groups
 alert.users = "all"
+alert.grace.seconds = 60 # wait 60 seconds before sending another alert
 
 
-[check.cpu.limit]
-pct = 11  # 5 % limit
-
+[check.cpu]
+usage.pct = 1  # 5 % limit
 
 [check.cpu.loadavg]
-min1 = 0
-min5 = 4
-min15 = 7
+usage.1m = 0
+usage.5m = 2
+usage.15m = 9
 
-[check.filesystem.home]
-limit.pct = 30  # alert on 30% usage of /home
-alert_every = 5 # send alert on every 5 % increase
+[check.memory]
+usage.pct = 1
+usage.size.gb = 200
+
+[check.fs.opt]
+path = "/opt"
+usage.size.gb = 30
+
+[check.fs.home]
+path = "/home"
+usage.pct = 20
+alert.every = 5
+
+[check.process.kdb]
+
+
+[check.interface.em1]
+
+[check.network.apache]
 
 
 
-# loadavg.15m.limit = 15
+[check.script.myscript]
+path = "/home/user/myscript.sh"
+success.key = 0
 
-[[script]]
-path = "/home/user/script.sh" # custom shell script check (returns 2 values, shell output 1/0 and message, ie
-# 0, "no issues"
-# 1, "error, some error happened"
+[check.script.someother]
+path = "/opt/script2.sh"
+success.key = "mysuccess"
 
-
-[[script]]
-path = "/opt/check.sh" # more custom checks

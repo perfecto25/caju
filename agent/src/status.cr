@@ -20,7 +20,7 @@ module Agent::Status
     @[JSON::Field(key: "stats")]
     property stats : Hash(String, Hash(String, Array(Float64) | Int32) | Hash(String, Int64) | Nil)
     @[JSON::Field(key: "checks")]
-    property checks : Hash(String, Hash(String, Hash(String, Array(Float64) | String)))
+    property checks : Hash(String, Hash(String, Hash(String, Array(Float64) | Array(Int32) | String)))
 
     def initialize(@meta, @stats, @checks)
     end
@@ -62,8 +62,8 @@ module Agent::Status
         "memory" => Memory.get_mem_info
       },
       {
-        "alert" => {} of String => Hash(String, String | Array(Float64)),
-        "ok" => {} of String => Hash(String, String | Array(Float64)),
+        "alert" => {} of String => Hash(String, String | Array(Float64) | Array(Int32)),
+        "ok" => {} of String => Hash(String, String | Array(Float64) | Array(Int32)),
       }
     )
     compare_status(config, payload, log)

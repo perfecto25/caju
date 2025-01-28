@@ -71,10 +71,10 @@ module Agent::Cpu
         if actual_val.is_a?(Int32)
           # create ALERT if actual value is over threshold of config value
           if cfg_val.as_i <= actual_val
-            payload.checks["alert"]["cpu"]["limit"] = [cfg_val.as_i, actual_val].join(", ")
+            payload.checks["alert"]["cpu"]["limit"] = [cfg_val.as_i, actual_val] #.join(", ")
           else
             # create OK if actual value is below threshold of config value
-            payload.checks["ok"]["cpu"]["limit"] = [cfg_val.as_i, actual_val].join(", ")
+            payload.checks["ok"]["cpu"]["limit"] = [cfg_val.as_i, actual_val] #.join(", ")
           end
         end
       end
@@ -115,11 +115,10 @@ module Agent::Cpu
 
   # returns all CPU statuses
   def get_status(config, payload, log)
-    
     ### create Alert and OK keys
     ["alert","ok"].each do |key|
       if ! payload.checks.dig?(key, "cpu")
-        payload.checks[key]["cpu"] = {} of String => String | Array(Float64)
+        payload.checks[key]["cpu"] = {} of String => String | Array(Float64) | Array(Int32)
       end
     end
 
