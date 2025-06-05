@@ -8,42 +8,52 @@ alert.groups = "all" # alert all configured groups
 alert.users = "all"
 alert.grace.seconds = 60 # wait 60 seconds before sending another alert
 
+[check]
 
 [check.cpu]
 usage.pct = 1  # 5 % limit
+iowait = 20 # 20% iowaiting
 
-[check.cpu.loadavg]
-usage.1m = 0
-usage.5m = 2
-usage.15m = 9
+
+# 1m, 2m, 15m loadavg by cpu %
+usage.loadavg = [12, 34, 45]
 
 [check.memory]
 usage.pct = 1
 usage.size.gb = 200
 
-[check.fs.opt]
+[check.filesystem.opt]
 path = "/opt"
 usage.size.gb = 30
 
-[check.fs.home]
+[check.filesystem.home]
 path = "/home"
-usage.pct = 20
+usage.pct = 20 
 alert.every = 5
 
+[check.filesystem.secure]
+path = "/etc/securedir"
+usage.pct = 20
+perm.user = "root" # alert if user changes
+perm.group = "root"
+perm.mode = 600
+
+
 [check.process.kdb]
+process.pid = "/kdb.pid"
+process.match = "/usr/bin/kdb -c fr*"
+
+[check.network.interface.em1]
+name = "em1"
 
 
-[check.interface.em1]
-
-[check.network.apache]
-
+[check.network.connection.apache]
+name = "apache"
+port = 8080
 
 
 [check.script.myscript]
 path = "/home/user/myscript.sh"
-success.key = 0
 
 [check.script.someother]
 path = "/opt/script2.sh"
-success.key = "mysuccess"
-
