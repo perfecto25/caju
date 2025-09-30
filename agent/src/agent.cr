@@ -65,7 +65,7 @@ module Agent
   if daemon == true
     puts "starting caju agent process"
     loop do
-      sleep 5
+      sleep 5.seconds
       payload = Status.get_payload(config, log).to_msgpack
       #payload = MessagePack.pack({"test" => "aaa"})
       response = HTTP::Client.post("http://localhost:8090", 
@@ -86,7 +86,7 @@ module Agent
   end # daemon
   
   # if status return status
-  if status == true && daemon == false
+    if status == true && daemon == false
     puts "getting status"
     begin
       payload = Status.get_payload(config, log)
@@ -107,14 +107,15 @@ module Agent
         ### cycle through Checks Hash and create array for output Table
         if payload.checks.is_a?(Hash)
           p "HASH"
+          
           if payload.checks.has_key?("alert")
             payload.checks["alert"].each do | key, val |
               p key.colorize(:yellow)
               p val.colorize(:green)
               if val.is_a?(Hash)
                 val.each do | k, v |
-                  p v
-                  p k.colorize(:cyan)
+                  #p v
+                  #p k.colorize(:cyan)
                   data << ["(#{key}) #{k}", v[0].to_s, v[1].to_s, "alert".colorize(:red), check_type[key]]
                 end
               end
@@ -132,7 +133,7 @@ module Agent
           end # ok
         end # payload is hash
       end # if Payload
-      p data
+      #p data
 
       # generate output table
       table = Tallboy.table do
@@ -145,7 +146,7 @@ module Agent
         end
         header
         if data
-          
+
           rows data
         end
       end # table

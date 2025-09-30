@@ -50,7 +50,7 @@ module Agent::Cpu
       
       prev_idle = idle
       prev_total = total
-      sleep 1
+      sleep 1.second
     end
 
     return percent.round(2).to_i32
@@ -92,6 +92,7 @@ module Agent::Cpu
 
     cfg_val = config.dig?("check", "cpu", "loadavg")
     actual_val = payload.stats.dig?("cpu", "loadavg")
+    log.warn { "cfg_val #{cfg_val}" }
     
     begin
       if !cfg_val.nil? && !actual_val.nil? && actual_val.is_a?(Array(Float64))
