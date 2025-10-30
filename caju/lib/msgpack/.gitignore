@@ -1,0 +1,12 @@
+.crystal/
+.DS_Store
+.idea/
+private/
+*.msg
+*.js
+bin_*
+*.dwarf
+*.swp
+*.bin
+.todo
+/shard.lock

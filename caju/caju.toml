@@ -1,0 +1,26 @@
+[log]
+destination = "stdout"
+level = "debug"
+
+
+[defaults]
+alert.repeat = "yes" # repeat alert on each cycle
+alert.groups = "all" # alert all configured groups
+alert.users = "all"
+alert.grace.seconds = 60 # wait 60 seconds before sending another alert
+
+[check]
+
+[check.cpu]
+usage.pct = 1  # 5 % limit
+iowait.pct = 20
+loadavg = [12, 34, 45]
+
+
+[check.memory]
+usage.pct = 1
+usage.gb = 200
+
+[check.filesystem.home]
+path = "/home"
+usage.gb = 30
