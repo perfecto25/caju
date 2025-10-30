@@ -1,0 +1,15 @@
+---
+version: 1.0
+shards:
+  hardware:
+    git: https://github.com/crystal-community/hardware.git
+    version: 0.5.3
+  msgpack:
+    git: https://github.com/crystal-community/msgpack-crystal.git
+    version: 1.3.4
+  toml:
+    git: https://github.com/crystal-community/toml.cr.git
+    version: 0.8.1
+  tallboy:
+    git: https://github.com/epoch/tallboy.git
+    version: 0.9.3

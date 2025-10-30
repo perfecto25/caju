@@ -1,0 +1,10 @@
+name: hardware
+version: 0.5.3
+
+authors:
+  - bararchy <bar.hofesh@safe-t.com>
+  - Julien Reichardt <git@jrei.ch>
+
+crystal: ">= 0.35, < 2"
+
+license: MIT
