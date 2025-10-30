@@ -2,7 +2,8 @@ require "option_parser"
 require "toml"
 require "msgpack"
 require "./log"
-require "./meta"
+require "./sysinfo"
+require "./table"
 
 
 module Caju
@@ -16,6 +17,7 @@ module Caju
   cfgfile = "/etc/caju/caju.toml"
   daemon = false
   status = false
+  info = false
 
   OptionParser.parse do |parser|
     parser.banner = "Caju - system monitoring tool"
@@ -30,6 +32,7 @@ module Caju
     end
     
     parser.on("-d", "--daemon", "run as daemon") { daemon = true }
+    parser.on("-i", "--info", "show system information") { info = true }
     parser.on("-s", "--status", "get monitor status") { status = true }
 
     parser.invalid_option do |flag|
@@ -39,18 +42,23 @@ module Caju
     end
   end
 
-  abort "config file is missing", 1 if !File.file? cfgfile
-  
-  begin
-    config = TOML.parse(File.read(cfgfile)).as(Hash)
-  rescue exception
-    abort "unable to parse TOML: #{exception}", 1
+  if info == false
+    abort "config file is missing", 1 if !File.file? cfgfile
+    begin
+      config = TOML.parse(File.read(cfgfile)).as(Hash)
+    rescue exception
+      abort "unable to parse TOML: #{exception}", 1
+    end
+    log = init_log(config)  
+    log.info { config }
+
   end
+
   
-  log = init_log(config)
+
 
   # if daemon, start background proc
-  log.info { config }
+  
   if daemon == true
     puts "starting caju agent process"
     loop do
@@ -75,12 +83,21 @@ module Caju
     end # loop
   end # daemon
 
+  if info == true
+    # show system info
+    begin
+      sysinfo = Caju::SysInfo::Sysinfo.new
+      Caju::Table.print_table(sysinfo.to_json)
+      
+    end
+  end
+
   # if status return status
   if status == true && daemon == false
     puts "getting status"
     begin
-      meta = Caju::Meta::Meta.new
-      puts meta
+      sysinfo = Caju::SysInfo::Sysinfo.new
+      puts sysinfo
 #      puts sys_info.to_json
     end
   end

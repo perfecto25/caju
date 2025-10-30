@@ -5,7 +5,7 @@ module Caju::SysInfo
   extend self
 
   # Structure to hold system information metadata
-  struct Meta
+  struct Sysinfo
     property hostname : String
     property cpu_count : Int64
     property cpu_load_average : Hash(String, Float64)
