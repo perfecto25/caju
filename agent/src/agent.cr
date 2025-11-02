@@ -146,7 +146,6 @@ module Agent
         end
         header
         if data
-
           rows data
         end
       end # table

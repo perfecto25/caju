@@ -4,6 +4,10 @@ require "system"
 module Caju::SysInfo
   extend self
 
+  def b_to_gb(bytes)
+    return bytes / 1_073_741_824.0
+  end
+
   # Structure to hold system information metadata
   struct Sysinfo
     property hostname : String
@@ -16,7 +20,6 @@ module Caju::SysInfo
     property model : String
     property process_memory : Hash(String, UInt64)
     property system_memory : Hash(String, UInt64)
-    property cpu_load_average : Hash(String, Float64)
 
     def initialize
       @hostname = get_hostname
@@ -140,7 +143,7 @@ module Caju::SysInfo
           mem_free = 0_u64
           buffers = 0_u64
           cached = 0_u64
-          mem_available = 0_u64
+          mem_available = 0_u64 
           File.read_lines("/proc/meminfo").each do |line|
             parts = line.split
             next unless parts.size >= 2

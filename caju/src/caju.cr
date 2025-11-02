@@ -1,9 +1,12 @@
 require "option_parser"
 require "toml"
 require "msgpack"
+require "colorize"
+require "hardware"
+require "tallboy"
 require "./log"
 require "./sysinfo"
-require "./table"
+
 
 
 module Caju
@@ -51,14 +54,10 @@ module Caju
     end
     log = init_log(config)  
     log.info { config }
-
   end
 
-  
 
-
-  # if daemon, start background proc
-  
+  # if daemon, start background proc  
   if daemon == true
     puts "starting caju agent process"
     loop do
@@ -84,13 +83,32 @@ module Caju
   end # daemon
 
   if info == true
-    # show system info
     begin
       sysinfo = Caju::SysInfo::Sysinfo.new
-      Caju::Table.print_table(sysinfo.to_json)
-      
+      columns = Nil
+      row_data = [] of Array(String)
+      row_data << ["hostname", sysinfo.hostname.to_s]
+      row_data << ["model", sysinfo.model.to_s]
+      row_data << ["manufacturer", sysinfo.manufacturer.to_s]
+      row_data << ["CPU count", sysinfo.cpu_count.to_s]
+      row_data << ["memory", Caju::SysInfo.b_to_gb(sysinfo.system_memory["size"]).round(3).to_s + " GB"]
+      table = Tallboy.table do
+        header do
+          cell "Caju sysinfo", span: 2
+        end 
+        if row_data
+          row_data.each do |r|
+            row r  
+          end
+        end
+      end # table
+      puts table.render 
+    rescue exception
+      puts exception.colorize(:red)
+      exception.inspect_with_backtrace(STDOUT)
+      exit 1
     end
-  end
+  end # if
 
   # if status return status
   if status == true && daemon == false

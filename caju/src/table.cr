@@ -4,28 +4,45 @@ require "tallboy"
 module Caju::Table
   extend self
 
-  def print_table(json)
-    puts "printing table"
-  end
-
-  class TablePrinter
-    # Method to print a table from 2D array
-    def self.print_table(data, headers)
-    # Determine the maximum width for each column
-    column_widths = (0...headers.size).map do |i|
-        [headers[i].to_s.size] + data.map { |row| row[i].to_s.size }
-    end
-      
-    # Print headers
-    puts headers.each_with_index.map { |header, i| header.to_s.ljust(column_widths[i]) }.join(" | ")
-    puts "-" * headers.map.with_index { |_, i| column_widths[i] + 3 }.sum
+  def print_table(column_data , row_data )
+    puts "printing table #{column_data} , #{row_data}"
     
-    # Print rows
-    data.each do |row|
-      puts row.each_with_index.map { |cell, i| cell.to_s.ljust(column_widths[i]) }.join(" | ")
+    if column_data.nil?
+      puts "NILLLL"
     end
-    end
-  end
+
+    begin
+      table = Tallboy.table do
+        # unless column_data.nil?
+        #   cdata = column_data 
+        #   column_data.not_nil!.each do |c|
+        #     add c
+        #   end
+
+        #   columns do
+        #     cdata.each do |c|
+        #       add c
+        #     end
+        #   end
+        # end
+
+        header
+          
+        if row_data
+          row_data.each |r| do
+            rows r  
+          end
+        end
+      end # table
+
+      puts table.render(:markdown) 
+
+    rescue error
+      puts error.colorize(:red)
+      error.inspect_with_backtrace(STDOUT)
+      exit 1
+    end # begin
+  end # def
 
 
 end # module
