@@ -1,7 +1,7 @@
 require "json"
 require "system"
 
-module Caju::SysInfo
+module Caju::Sys
   extend self
 
   def b_to_gb(bytes)
@@ -9,7 +9,7 @@ module Caju::SysInfo
   end
 
   # Structure to hold system information metadata
-  struct Sysinfo
+  struct Info
     property hostname : String
     property cpu_count : Int64
     property cpu_load_average : Hash(String, Float64)
@@ -143,7 +143,7 @@ module Caju::SysInfo
           mem_free = 0_u64
           buffers = 0_u64
           cached = 0_u64
-          mem_available = 0_u64 
+          mem_available = 0_u64
           File.read_lines("/proc/meminfo").each do |line|
             parts = line.split
             next unless parts.size >= 2
@@ -206,4 +206,3 @@ module Caju::SysInfo
   end
 
 end # Module
-

@@ -1,5 +1,9 @@
 require "log"
 
+macro log_source
+  log = ::Log.for("{{@type.name}}::{{@def.name.id}}")
+end
+
 def init_log(cfg)
   begin
     log_path = cfg.dig?("log", "destination")
@@ -40,9 +44,10 @@ def init_log(cfg)
         Log::Severity::Info
       end
 
-    log = ::Log.for("Agent")
-    log.level = severity_level
-    log
+#    log = ::Log.for("Caju")
+    log_source
+#    log.level = severity_level
+    #log
   rescue exception
     abort exception, 1
   end

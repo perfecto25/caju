@@ -4,13 +4,15 @@ require "msgpack"
 require "colorize"
 require "hardware"
 require "tallboy"
-require "./log"
-require "./sysinfo"
-
-
+require "log"
+#require "./log"
+require "./sys"
+require "./status"
 
 module Caju
   extend self
+
+  Log = ::Log.for("Caju")
 
   {% begin %}
     VERSION = {{ `shards version "#{__DIR__}"`.chomp.stringify.downcase }}
@@ -33,7 +35,7 @@ module Caju
       STDOUT.puts VERSION
       exit(0)
     end
-    
+
     parser.on("-d", "--daemon", "run as daemon") { daemon = true }
     parser.on("-i", "--info", "show system information") { info = true }
     parser.on("-s", "--status", "get monitor status") { status = true }
@@ -52,12 +54,12 @@ module Caju
     rescue exception
       abort "unable to parse TOML: #{exception}", 1
     end
-    log = init_log(config)  
-    log.info { config }
+    #log = init_log(config)
+    #log.info { config }
   end
 
 
-  # if daemon, start background proc  
+  # if daemon, start background proc
   if daemon == true
     puts "starting caju agent process"
     loop do
@@ -65,44 +67,45 @@ module Caju
       puts "running demon"
       #payload = Status.get_payload(config, log).to_msgpack
       #payload = MessagePack.pack({"test" => "aaa"})
-      #response = HTTP::Client.post("http://localhost:8090", 
+      #response = HTTP::Client.post("http://localhost:8090",
       #  headers: HTTP::Headers {
       #    "Content-Type" => "application/msgpack",
       #    "Accept" => "application/msgpack"
       #  },
       #  body: payload
       #)
-      
+
       #if response.success?
       #  result = MessagePack.unpack(response.body)
       #  puts result
-      #else 
+      #else
       #  puts "Error #{response.status_code}"
       #end
     end # loop
   end # daemon
 
   if info == true
+  Log.info { "INFO" }
     begin
-      sysinfo = Caju::SysInfo::Sysinfo.new
+      sysinfo = Caju::Sys::Info.new
       columns = Nil
       row_data = [] of Array(String)
       row_data << ["hostname", sysinfo.hostname.to_s]
       row_data << ["model", sysinfo.model.to_s]
       row_data << ["manufacturer", sysinfo.manufacturer.to_s]
       row_data << ["CPU count", sysinfo.cpu_count.to_s]
-      row_data << ["memory", Caju::SysInfo.b_to_gb(sysinfo.system_memory["size"]).round(3).to_s + " GB"]
+      row_data << ["memory", Caju::Sys.b_to_gb(sysinfo.system_memory["size"]).round(3).to_s + " GB"]
       table = Tallboy.table do
         header do
           cell "Caju sysinfo", span: 2
-        end 
+        end
         if row_data
           row_data.each do |r|
-            row r  
+            row r
           end
         end
       end # table
-      puts table.render 
+      puts table.render
     rescue exception
       puts exception.colorize(:red)
       exception.inspect_with_backtrace(STDOUT)
@@ -112,13 +115,15 @@ module Caju
 
   # if status return status
   if status == true && daemon == false
-    puts "getting status"
     begin
-      sysinfo = Caju::SysInfo::Sysinfo.new
-      puts sysinfo
+      sysinfo = Caju::Sys::Info.new
+      #puts typeof(config)
+      #puts sysinfo
 #      puts sys_info.to_json
+      status = Caju::Status::Checker.new(config.not_nil!, sysinfo)
+      p status
     end
   end
-  
+
 
 end # Module
