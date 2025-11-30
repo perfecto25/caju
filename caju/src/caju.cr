@@ -94,6 +94,7 @@ module Caju
       row_data << ["model", sysinfo.model.to_s]
       row_data << ["manufacturer", sysinfo.manufacturer.to_s]
       row_data << ["CPU count", sysinfo.cpu_count.to_s]
+      row_data << ["CPU vendor", sysinfo.cpu_details["vendor_id"].to_s]
       row_data << ["memory", Caju::Sys.b_to_gb(sysinfo.system_memory["size"]).round(3).to_s + " GB"]
       table = Tallboy.table do
         header do
