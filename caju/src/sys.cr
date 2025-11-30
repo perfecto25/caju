@@ -13,6 +13,7 @@ module Caju::Sys
     property hostname : String
     property cpu_count : Int64
     property cpu_load_average : Hash(String, Float64)
+    property cpu_details : Hash(String, String)
     property swap_size : UInt64
     property disk_usage : Hash(String, Hash(String, UInt64))
     property mounts : Array(String)
@@ -24,13 +25,15 @@ module Caju::Sys
     def initialize
       @hostname = get_hostname
       @cpu_count = System.cpu_count
+      @cpu_load_average = get_cpu_load_average
+      @cpu_details = get_cpu_details
       @swap_size = get_swap_size
       @disk_usage = get_disk_usage
       @mounts = get_mounts
       @manufacturer, @model = get_hardware_info
       @process_memory = get_process_memory
       @system_memory = get_system_memory
-      @cpu_load_average = get_cpu_load_average
+      
     end
 
     # Get hostname
@@ -186,6 +189,17 @@ module Caju::Sys
         end
       {% end %}
       load_avg
+    end
+
+    private def get_cpu_details : Hash(String, String)
+      cpu_make = {} of String => String
+      File.read("/proc/cpuinfo").each_line do |line|
+        if line.includes?(":")
+          key, value = line.split(":", 2).map(&.strip)
+          cpu_make[key] = value
+        end
+      end
+      return cpu_make
     end
 
     # Convert to JSON
