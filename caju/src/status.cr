@@ -11,7 +11,9 @@ module Caju::Status
    # paylod = {
    #   "filesystem.home": [0, "36", "50"]
    # }
-    property status : Hash(String, Array(String | Int32))
+
+
+    property status : Hash(String, Array(Int32 | String)) | String
 
     def initialize(@config : Hash(String, TOML::Any), @sysinfo : Caju::Sys::Info)
       @status = get_status(config, sysinfo)
@@ -22,6 +24,14 @@ module Caju::Status
       if ! config.has_key?("check")
         return "No checks defined in config file"
       end
+
+      p typeof(config["check"])
+      table = config["check"].as(TOML::Table)
+      table.each do |key, value|
+        puts "#{key}: #{value}"
+      end
+
+
       return {"test" => [0, "23"]}
     end
 
