@@ -12,15 +12,16 @@ alert.grace.seconds = 60 # wait 60 seconds before sending another alert
 [check]
 
 [check.cpu]
-usage.pct = 1  # 5 % limit
+usage.pct = 1
 iowait.pct = 20
-loadavg = [12, 34, 45]
+loadavg.1 = 2
+loadavg.5 = 15
+loadavg.15 = 23  # alert if 15min load avg is above 23
 
 
 [check.memory]
-usage.pct = 1
-usage.gb = 200
+usage.gb = 1
 
 [check.filesystem.home]
 path = "/home"
-usage.gb = 30
+usage.pct = 30
