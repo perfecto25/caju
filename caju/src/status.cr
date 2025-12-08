@@ -1,6 +1,7 @@
 require "json"
 require "./sys"
 require "log"
+require "./checkers/*"
 #require "./log"
 
 module Caju::Status
@@ -22,23 +23,11 @@ module Caju::Status
       report = nil
       checks = config["check"].as_h
       checks.each do | cname, ctype |
-        ## CPU
+        p "cname=#{cname}, ctype=#{ctype}"
+
         if cname == "cpu"
-          if ctype.as_h.has_key?("usage")
-            if ctype["usage"].as_h.has_key?("pct")
-              flag = 0
-              expected = ctype["usage"]["pct"].as_i64.to_i32
-              actual = sysinfo.cpu_usage.to_i32
-              if actual >= expected
-                flag = 1
-              else
-                flag = 0
-              end
-              report = {"cpu" => { "usage" => {"flag" => flag, "expected" => expected, "actual" => actual}}}
-            end
-          end # usage pct
-          if ctype.as_h.has_key?(loadav)
-        end # CPU
+          report = cpu_checker(report, ctype, sysinfo)
+        end
 
 
       end # checks loop

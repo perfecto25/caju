@@ -1,26 +1,33 @@
-  def check_cpu_limit_status(config, payload, log)
-    log = ::Log.for("Caju::CPU::check_cpu_limit_status")
+  def cpu_checker(report, ctype, sysinfo)
+    ## Check CPU expected vs actual
 
-    return payload if ! (config.dig?("check", "cpu", "limit") && payload.stats.dig?("cpu", "pct"))
-
-    cfg_val = config.dig?("check", "cpu", "limit", "pct")
-    actual_val = payload.stats.dig?("cpu", "pct")
-
-    begin
-      if !cfg_val.nil? && !actual_val.nil?
-        if actual_val.is_a?(Int32)
-          # create ALERT if actual value is over threshold of config value
-          if cfg_val.as_i <= actual_val
-            payload.checks["alert"]["cpu"]["limit"] = [cfg_val.as_i, actual_val] #.join(", ")
-          else
-            # create OK if actual value is below threshold of config value
-            payload.checks["ok"]["cpu"]["limit"] = [cfg_val.as_i, actual_val] #.join(", ")
-          end
+    # CPU USAGE
+    if ctype.as_h.has_key?("usage")
+      if ctype["usage"].as_h.has_key?("pct")
+        flag = 0
+        expected = ctype["usage"]["pct"].as_i64.to_i32
+        actual = sysinfo.cpu_usage.to_i32
+        if actual >= expected
+          flag = 1
+        else
+          flag = 0
         end
+        report = {"cpu" => { "usage" => {"flag" => flag, "expected" => expected, "actual" => actual}}}
       end
-    rescue exception
-      log.error { exception.colorize(:red) }
-    end
+    end # CPU USAGE
 
-    return payload
-  end # check_cpu_limit_status
+    # CPU LOADAVG
+    if ctype.as_h.has_key?("loadavg")
+      if ctype["loadavg"].as_h.has_key?("1")
+        p "loadvg 1"
+      end
+      if ctype["loadavg"].as_h.has_key?("5")
+        p "loadvg 5"
+      end
+      if ctype["loadavg"].as_h.has_key?("15")
+        p "loadvg 15"
+      end
+    end # CPU LOADAVG
+
+    return report
+  end # cpu_checker
