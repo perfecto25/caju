@@ -14,10 +14,7 @@ alert.grace.seconds = 60 # wait 60 seconds before sending another alert
 [check.cpu]
 usage.pct = 1
 iowait.pct = 20
-loadavg.1 = 2
-loadavg.5 = 15
-loadavg.15 = 23  # alert if 15min load avg is above 23
-
+loadavg = [2,15,23]
 
 [check.memory]
 usage.gb = 1

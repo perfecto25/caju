@@ -121,6 +121,7 @@ module Caju
       #puts typeof(config)
       #puts sysinfo
 #      puts sys_info.to_json
+
       report = Caju::Status::Checker.new(config.not_nil!, sysinfo)
       p sysinfo.system_memory
 

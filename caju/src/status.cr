@@ -6,7 +6,6 @@ require "./checkers/*"
 
 module Caju::Status
   extend self
-
   struct Checker
     include JSON::Serializable
     Log = ::Log.for("Caju::Status::Checker")
@@ -20,12 +19,17 @@ module Caju::Status
       if ! config.has_key?("check")
         return "No checks defined in config file"
       end
-      report = nil
+
+
+      report = Hash(String, Hash(String, Hash(String, Int32))).new
+
       checks = config["check"].as_h
       checks.each do | cname, ctype |
-        p "cname=#{cname}, ctype=#{ctype}"
+        p "CHKS cname=#{cname}, ctype=#{ctype}"
 
         if cname == "cpu"
+          # if report is nil then create new hash
+          report["cpu"] ||= Hash(String, Hash(String, Int32)).new
           report = cpu_checker(report, ctype, sysinfo)
         end
 
