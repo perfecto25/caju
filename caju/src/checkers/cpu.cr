@@ -21,8 +21,14 @@ def cpu_checker(report, ctype, sysinfo)
     # CPU LOADAVG
     if ctype.as_h.has_key?("loadavg")
       # >>> add checks if array, if has 3 elements if can cast to float64
-      report = compare("cpu", "loadavg.1",ctype["loadavg"][0].as_i64.to_f64, sysinfo.cpu_load_average["1min"].to_f64)
-      report = compare("cpu", "loadavg.5",ctype["loadavg"][1].as_i64.to_f64, sysinfo.cpu_load_average["5min"].to_f64)
+      p typeof(ctype.as_h["loadavg"])
+
+      if ctype["loadavg"].size != 3
+        puts "Load Average is incorrect in config file, need an array of 1min, 5min, 15min, ie loadavg = [1,5,15]"
+      end
+        #[0].as?(Float64)}"
+#      report = compare("cpu", "loadavg.1",ctype["loadavg"][0].as?(Float64), sysinfo.cpu_load_average["1min"].as?(Float64))
+#      report = compare("cpu", "loadavg.5",ctype["loadavg"][1].as_i64.to_f64, sysinfo.cpu_load_average["5min"].to_f64)
     end # CPU LOADAVG
 
     return report
